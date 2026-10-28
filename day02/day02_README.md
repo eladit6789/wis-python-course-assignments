@@ -1,5 +1,5 @@
 
-# Day 02 – Python Assignment
+# Day 02 – Hello World Assignment
 
 ## What I Did
 
