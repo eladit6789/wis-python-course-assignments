@@ -29,6 +29,7 @@ I used ChatGPT to help me understand the assignment instructions, organize the p
 Example prompts I used:
 
 - "Help me understand the steps required for the second assignment."
+- "How do I clone a GitHub repository to my computer using VS Code?"
 - "Help me create and run a simple Python program in VS Code."
 
 I followed the instructions step by step and verified that the program ran successfully.
