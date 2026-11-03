@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f6f7f2">
+    <title>Science Showdown</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="science_trivia.css">
+    <script src="science_trivia.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="wordmark" href="science_trivia.html" aria-label="Science Showdown home">
+        <span class="wordmark-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span>FIELD<span class="wordmark-light">/</span>TEST</span>
+      </a>
+      <div class="topbar-center"><span class="live-dot"></span> THE SCIENCE ARCADE</div>
+      <button class="reset-button" id="reset-button" type="button" title="Start a new round">NEW ROUND <span aria-hidden="true">↗</span></button>
+    </header>
+
+    <main class="game-layout">
+      <aside class="scoreboard" aria-label="Game scoreboard">
+        <div class="scoreboard-heading">YOUR SESSION <span>01</span></div>
+        <div class="score-total"><span id="score-value">00</span><small>PTS</small></div>
+        <div class="score-divider"></div>
+        <div class="round-stat"><span>ROUND</span><strong id="round-count">00 / 05</strong></div>
+        <div class="progress-track" aria-label="Round progress"><span id="progress-fill"></span></div>
+        <div class="scoreboard-foot"><span class="status-square"></span><span id="status-copy">READY WHEN YOU ARE</span></div>
+        <div class="side-art" aria-hidden="true">
+          <span class="art-label">OBSERVE<br>QUESTION<br>REPEAT</span>
+          <svg viewBox="0 0 170 120" role="img" aria-label="Abstract atom illustration">
+            <ellipse cx="85" cy="60" rx="68" ry="25" transform="rotate(-28 85 60)" fill="none" stroke="currentColor" stroke-width="2" />
+            <ellipse cx="85" cy="60" rx="68" ry="25" transform="rotate(28 85 60)" fill="none" stroke="currentColor" stroke-width="2" />
+            <ellipse cx="85" cy="60" rx="68" ry="25" transform="rotate(90 85 60)" fill="none" stroke="currentColor" stroke-width="2" />
+            <circle cx="85" cy="60" r="8" fill="#ed654d" />
+            <circle cx="145" cy="36" r="5" fill="#d5ed5a" />
+            <circle cx="50" cy="102" r="5" fill="#2079e9" />
+          </svg>
+        </div>
+        <div class="version-tag">BIOLOGY · CHEMISTRY · PHYSICS · EARTH</div>
+      </aside>
+
+      <section class="play-area" aria-label="Trivia game">
+        <div id="loading-state" class="loading-state" role="status">LOADING QUESTION BANK<span class="loading-mark">...</span></div>
+        <div id="error-state" class="error-state" role="alert" hidden></div>
+
+        <section id="welcome-screen" class="screen welcome-screen" hidden>
+          <div class="eyebrow"><span class="eyebrow-line"></span> FIELD TEST NO. 01</div>
+          <h1>Science<br><span>Showdown</span><sup>®</sup></h1>
+          <p class="welcome-copy">Choose your fields. Take on five questions.<br>How much do you know?</p>
+          <fieldset class="area-picker">
+            <legend>INCLUDE SCIENCE AREAS</legend>
+            <div class="area-options">
+              <label class="area-chip"><input type="checkbox" name="science-area" value="Biology" checked><span>Biology</span></label>
+              <label class="area-chip"><input type="checkbox" name="science-area" value="Chemistry" checked><span>Chemistry</span></label>
+              <label class="area-chip"><input type="checkbox" name="science-area" value="Physics" checked><span>Physics</span></label>
+              <label class="area-chip"><input type="checkbox" name="science-area" value="Earth Science" checked><span>Earth Science</span></label>
+            </div>
+          </fieldset>
+          <p class="area-selection-error" id="area-selection-error" role="alert" hidden>Select at least one science area to start.</p>
+          <div class="welcome-bottom">
+            <button class="primary-button" id="start-button" type="button">START GAME <span aria-hidden="true">→</span></button>
+            <span class="micro-copy"><span id="pool-count">80 QUESTIONS IN POOL</span> <b>·</b> 5 RANDOM QUESTIONS <b>·</b> NO TIME LIMIT</span>
+          </div>
+          <div class="welcome-stamp" aria-hidden="true"><span>EST.</span><strong>SCI<br>101</strong><span>PLAY</span></div>
+        </section>
+
+        <section id="question-screen" class="screen question-screen" hidden>
+          <div class="question-meta">
+            <div class="eyebrow"><span class="eyebrow-line"></span><span id="question-number">QUESTION 01 / 05</span></div>
+            <span class="category-label" id="category-label">BIOLOGY</span>
+          </div>
+          <h1 class="question-title" id="question-text"></h1>
+          <div class="answer-list" id="answer-list" role="group" aria-label="Choose an answer"></div>
+          <div class="feedback-row" id="feedback-row" aria-live="polite" hidden>
+            <div class="feedback-copy"><strong id="feedback-title"></strong><span id="explanation-text"></span></div>
+            <button class="next-button" id="next-button" type="button">NEXT <span aria-hidden="true">→</span></button>
+          </div>
+          <div class="question-footer"><span>SELECT YOUR ANSWER</span><span>KEYS <b>A</b> <b>B</b> <b>C</b> <b>D</b></span></div>
+        </section>
+
+        <section id="results-screen" class="screen results-screen" hidden>
+          <div class="eyebrow"><span class="eyebrow-line"></span> FIELD TEST COMPLETE</div>
+          <div class="result-score"><span id="final-score">00</span><small> / 100</small></div>
+          <h1 id="result-title">Nice work.</h1>
+          <p class="result-copy" id="result-copy"></p>
+          <div class="result-summary" id="result-summary" aria-label="Round results"></div>
+          <button class="primary-button" id="play-again-button" type="button">PLAY AGAIN <span aria-hidden="true">↻</span></button>
+        </section>
+      </section>
+    </main>
+    <footer class="page-footer"><span>THE CURIOUS CLUB</span><span>LEARN SOMETHING. KEEP MOVING.</span><span>DAY 03 <b>///</b> SCIENCE</span></footer>
+  </body>
+</html>
