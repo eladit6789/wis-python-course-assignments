@@ -6,6 +6,8 @@ The questions cover the Institute's founding as the Daniel Sieff Research Instit
 
 ## Play in a browser
 
+**Play the published game:** [Weizmann Institute History Quiz](https://eladit6789.github.io/wis-python-course-assignments/day03/weizmann_history_trivia/history_trivia.html). Open the link in a modern browser; no Python installation or local server is needed.
+
 The browser game loads its question bank from a CSV file, so run it through a local web server:
 
 1. Open a terminal in this folder.
