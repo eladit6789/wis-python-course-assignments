@@ -12,7 +12,6 @@ const elements = {
   error: document.querySelector("#error-state"),
   poolCount: document.querySelector("#pool-count"),
   areaSelectionError: document.querySelector("#area-selection-error"),
-  difficulty: document.querySelector("#difficulty-select"),
   welcome: document.querySelector("#welcome-screen"),
   question: document.querySelector("#question-screen"),
   results: document.querySelector("#results-screen"),
@@ -142,15 +141,21 @@ function getSelectedAreas() {
   );
 }
 
+function getSelectedDifficulty() {
+  const selectedDifficulty = document.querySelector('input[name="difficulty"]:checked');
+  if (!selectedDifficulty) throw new Error("Choose a difficulty before starting a round.");
+  return selectedDifficulty.value;
+}
+
 function getEligibleQuestions(selectedAreas = getSelectedAreas()) {
   return questions.filter((question) => (
     selectedAreas.has(question.category)
-    && question.difficulty === elements.difficulty.value
+    && question.difficulty === getSelectedDifficulty()
   ));
 }
 
 function updateQuestionPoolCount() {
-  elements.poolCount.textContent = `${getEligibleQuestions().length} ${elements.difficulty.value.toUpperCase()} QUESTIONS AVAILABLE`;
+  elements.poolCount.textContent = `${getEligibleQuestions().length} ${getSelectedDifficulty().toUpperCase()} QUESTIONS AVAILABLE`;
 }
 
 function updatePersonalBestDisplay() {
@@ -221,7 +226,7 @@ function startGame() {
     return;
   }
 
-  const selectedDifficulty = elements.difficulty.value;
+  const selectedDifficulty = getSelectedDifficulty();
   const eligibleQuestions = getEligibleQuestions(selectedAreas);
   if (eligibleQuestions.length < QUESTIONS_PER_ROUND) {
     elements.areaSelectionError.textContent = `There aren't enough ${selectedDifficulty.toLowerCase()} questions in those areas for a round.`;
@@ -387,9 +392,11 @@ document.querySelectorAll('input[name="science-area"]').forEach((input) => {
     updateQuestionPoolCount();
   });
 });
-elements.difficulty.addEventListener("change", () => {
-  elements.areaSelectionError.hidden = true;
-  updateQuestionPoolCount();
+document.querySelectorAll('input[name="difficulty"]').forEach((input) => {
+  input.addEventListener("change", () => {
+    elements.areaSelectionError.hidden = true;
+    updateQuestionPoolCount();
+  });
 });
 document.querySelector("#reset-button").addEventListener("click", () => {
   correctAnswers = 0;

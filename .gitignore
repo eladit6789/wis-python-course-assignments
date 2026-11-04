@@ -1,1 +1,28 @@
-questions.csv
+# Python bytecode and cache files
+__pycache__/
+*.py[cod]
+
+# Local Python environments
+.venv/
+venv/
+env/
+ENV/
+
+# Test, type-checker, and linter caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Build and packaging output
+build/
+dist/
+*.egg-info/
+
+# Operating-system files
+.DS_Store
+Thumbs.db
+
+# Local scratch file
+/tatus

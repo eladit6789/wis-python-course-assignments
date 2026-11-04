@@ -55,15 +55,26 @@
           <div class="eyebrow"><span class="eyebrow-line"></span> FIELD TEST NO. 01</div>
           <h1>Science<br><span>Showdown</span><sup>®</sup></h1>
           <p class="welcome-copy">Choose your fields. Take on five questions.<br>How much do you know?</p>
-          <label class="difficulty-picker" for="difficulty-select">
-            <span>DIFFICULTY</span>
-            <select id="difficulty-select" name="difficulty">
-              <option value="Easy">Easy</option>
-              <option value="Medium">Medium</option>
-              <option value="Hard">Hard</option>
-            </select>
-            <span class="difficulty-help">Easy: core facts · Medium: key concepts · Hard: deeper ideas</span>
-          </label>
+          <fieldset class="difficulty-picker">
+            <legend>CHOOSE DIFFICULTY</legend>
+            <div class="difficulty-options">
+              <label class="difficulty-option">
+                <input type="radio" name="difficulty" value="Easy" checked>
+                <span class="difficulty-name">Easy</span>
+                <span class="difficulty-description">Core facts</span>
+              </label>
+              <label class="difficulty-option">
+                <input type="radio" name="difficulty" value="Medium">
+                <span class="difficulty-name">Medium</span>
+                <span class="difficulty-description">Key concepts</span>
+              </label>
+              <label class="difficulty-option">
+                <input type="radio" name="difficulty" value="Hard">
+                <span class="difficulty-name">Hard</span>
+                <span class="difficulty-description">Deeper ideas</span>
+              </label>
+            </div>
+          </fieldset>
           <fieldset class="area-picker">
             <legend>INCLUDE SCIENCE AREAS</legend>
             <div class="area-options">
