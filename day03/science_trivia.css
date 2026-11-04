@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
-
 :root {
   color-scheme: light;
   --paper: #f6f7f2;
@@ -272,3 +270,77 @@ body {
 @media (max-width: 760px) {
   .welcome-stamp { display: none; }
 }
+
+.wordmark { letter-spacing: .04em; }
+.welcome-screen h1, .question-title, .results-screen h1 { letter-spacing: -.045em; }
+
+.difficulty-option, .area-chip {
+  border-radius: 10px;
+  box-shadow: 0 2px 0 #e8efec;
+}
+
+.difficulty-option:has(input:checked),
+.area-chip:has(input:checked) {
+  border-color: var(--blue);
+  background: #f0f4ff;
+  box-shadow: inset 0 0 0 1px var(--blue), 0 2px 0 #dce5ff;
+}
+
+.category-label {
+  --category-ink: #155e46;
+  --category-surface: #e7f5ed;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 30px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 5px 10px;
+  color: var(--category-ink);
+  background: var(--category-surface);
+  font-weight: 500;
+}
+
+.category-label::before {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  content: "";
+}
+
+.category-label[data-category="chemistry"] {
+  --category-ink: #5b3b91;
+  --category-surface: #f0eafe;
+}
+
+.category-label[data-category="physics"] {
+  --category-ink: #234c9a;
+  --category-surface: #e9f0ff;
+}
+
+.category-label[data-category="earth-science"] {
+  --category-ink: #8a431e;
+  --category-surface: #fff0e4;
+}
+
+.difficulty-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-weight: 500;
+}
+
+.answer-option { line-height: 1.45; }
+.answer-option:focus-visible { outline-offset: 4px; }
+.answer-option.correct { border-color: var(--green); background: #eff9f5; }
+.answer-option.incorrect { border-color: var(--red-text); background: #fff3ef; }
+.answer-option.muted { opacity: .7; }
+.answer-option.correct .answer-key { border-color: var(--green); color: #fff; background: var(--green); }
+.answer-option.incorrect .answer-key { border-color: var(--red-text); color: #fff; background: var(--red-text); }
+.feedback-row:has(.feedback-copy.is-wrong) { border-left-color: var(--red-text); background: #fff5f1; }
+.feedback-copy.is-correct strong { color: var(--green-text); }
+.feedback-copy.is-wrong strong { color: var(--red-text); }
+.result-mark { height: 10px; }

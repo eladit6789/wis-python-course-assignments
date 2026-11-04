@@ -255,6 +255,7 @@ function renderQuestion() {
   locked = false;
   elements.questionNumber.textContent = `QUESTION ${String(questionIndex + 1).padStart(2, "0")} / ${String(QUESTIONS_PER_ROUND).padStart(2, "0")}`;
   elements.category.textContent = question.category.toUpperCase();
+  elements.category.dataset.category = question.category.toLowerCase().replace(/\s+/g, "-");
   elements.difficultyLabel.textContent = question.difficulty.toUpperCase();
   elements.questionText.textContent = question.question;
   elements.questionText.setAttribute(

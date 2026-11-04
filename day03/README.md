@@ -79,6 +79,7 @@ Prompts used with AI in VS Code:
 - "Review the game for invalid input and explain the correct answer after each question."
 - "Write a README explaining how to run the game and list the AI prompts used."
 - "Refresh the browser game's design for desktop and mobile and expand the basic science question pool."
+- "Polish the browser game's visual design with category color accents and clearer answer and feedback cards."
 - "Let players choose which science categories to include in a trivia round."
 - "Review the science question bank for ambiguous wording, weak distractors, factual nuance, and explanations that need more context."
 
