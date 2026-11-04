@@ -15,6 +15,8 @@ choices, the correct answer, and a short explanation.
 
 ## How to run
 
+Play the published browser game in Chrome or another browser: [Science Showdown](https://eladit6789.github.io/wis-python-course-assignments/day03/science_trivia.html).
+
 To play the browser game, start a local web server from the `day03` folder:
 
 ```text
