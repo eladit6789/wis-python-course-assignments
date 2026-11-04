@@ -10,6 +10,8 @@ The browser game lets you choose Easy, Medium, or Hard questions and balances ea
 
 The command-line game asks from the selected science areas and reports your percentage score.
 
+The shared question bank has been reviewed for clearer wording, more plausible answer choices, and explanations that add scientific context.
+
 ### Option 1: Play in a browser
 
 **Play the published game:** [Science Showdown](https://eladit6789.github.io/wis-python-course-assignments/day03/science_trivia.html). Open the link in a modern browser. You do not need to install Python or run a local server to play the published version.
@@ -78,6 +80,7 @@ Prompts used with AI in VS Code:
 - "Write a README explaining how to run the game and list the AI prompts used."
 - "Refresh the browser game's design for desktop and mobile and expand the basic science question pool."
 - "Let players choose which science categories to include in a trivia round."
+- "Review the science question bank for ambiguous wording, weak distractors, factual nuance, and explanations that need more context."
 
 I reviewed the questions and tried the program, including invalid answer input.
 
