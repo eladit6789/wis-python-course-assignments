@@ -1,20 +1,33 @@
 const QUESTIONS_PER_ROUND = 5;
 const CHOICES = ["A", "B", "C", "D"];
+const DIFFICULTIES = ["Easy", "Medium", "Hard"];
+const POINTS_PER_ANSWER = 20;
+const STREAK_BONUS = 5;
+const MAX_ROUND_POINTS = QUESTIONS_PER_ROUND * POINTS_PER_ANSWER
+  + (QUESTIONS_PER_ROUND - 1) * STREAK_BONUS;
+const PERSONAL_BEST_KEY = "scienceShowdown.personalBest";
 
 const elements = {
   loading: document.querySelector("#loading-state"),
   error: document.querySelector("#error-state"),
   poolCount: document.querySelector("#pool-count"),
   areaSelectionError: document.querySelector("#area-selection-error"),
+  difficulty: document.querySelector("#difficulty-select"),
   welcome: document.querySelector("#welcome-screen"),
   question: document.querySelector("#question-screen"),
   results: document.querySelector("#results-screen"),
   score: document.querySelector("#score-value"),
+  bestScore: document.querySelector("#best-score"),
   roundCount: document.querySelector("#round-count"),
+  streakStat: document.querySelector("#streak-stat"),
+  streakCount: document.querySelector("#streak-count"),
+  progressTrack: document.querySelector("#progress-track"),
   progress: document.querySelector("#progress-fill"),
   status: document.querySelector("#status-copy"),
+  announcer: document.querySelector("#game-announcer"),
   questionNumber: document.querySelector("#question-number"),
   category: document.querySelector("#category-label"),
+  difficultyLabel: document.querySelector("#difficulty-label"),
   questionText: document.querySelector("#question-text"),
   answers: document.querySelector("#answer-list"),
   feedbackRow: document.querySelector("#feedback-row"),
@@ -26,12 +39,18 @@ const elements = {
   resultTitle: document.querySelector("#result-title"),
   resultCopy: document.querySelector("#result-copy"),
   resultSummary: document.querySelector("#result-summary"),
+  missedReview: document.querySelector("#missed-review"),
+  missedReviewList: document.querySelector("#missed-review-list"),
 };
 
 let questions = [];
 let roundQuestions = [];
 let questionIndex = 0;
 let correctAnswers = 0;
+let scorePoints = 0;
+let currentStreak = 0;
+let personalBest = 0;
+let personalBestAvailable = true;
 let locked = false;
 let answerResults = [];
 
@@ -95,38 +114,135 @@ function showScreen(screen) {
   });
 }
 
-function updateScoreboard() {
-  elements.score.textContent = String(correctAnswers * 20).padStart(2, "0");
-  elements.roundCount.textContent = `${String(questionIndex).padStart(2, "0")} / ${String(QUESTIONS_PER_ROUND).padStart(2, "0")}`;
-  elements.progress.style.width = `${(questionIndex / QUESTIONS_PER_ROUND) * 100}%`;
+function announce(message) {
+  elements.announcer.textContent = message;
 }
 
-function startGame() {
-  const selectedAreas = new Set(
+function updateScoreboard() {
+  const answeredQuestions = Math.min(
+    questionIndex + (locked ? 1 : 0),
+    QUESTIONS_PER_ROUND,
+  );
+  elements.score.textContent = String(scorePoints).padStart(2, "0");
+  elements.roundCount.textContent = `${String(answeredQuestions).padStart(2, "0")} / ${String(QUESTIONS_PER_ROUND).padStart(2, "0")}`;
+  elements.progress.style.width = `${(answeredQuestions / QUESTIONS_PER_ROUND) * 100}%`;
+  elements.progressTrack.setAttribute("aria-valuenow", String(answeredQuestions));
+  elements.progressTrack.setAttribute(
+    "aria-valuetext",
+    `${answeredQuestions} of ${QUESTIONS_PER_ROUND} questions answered`,
+  );
+  elements.streakStat.hidden = currentStreak === 0;
+  elements.streakCount.textContent = `${currentStreak}×`;
+}
+
+function getSelectedAreas() {
+  return new Set(
     [...document.querySelectorAll('input[name="science-area"]:checked')]
       .map((input) => input.value),
   );
+}
+
+function getEligibleQuestions(selectedAreas = getSelectedAreas()) {
+  return questions.filter((question) => (
+    selectedAreas.has(question.category)
+    && question.difficulty === elements.difficulty.value
+  ));
+}
+
+function updateQuestionPoolCount() {
+  elements.poolCount.textContent = `${getEligibleQuestions().length} ${elements.difficulty.value.toUpperCase()} QUESTIONS AVAILABLE`;
+}
+
+function updatePersonalBestDisplay() {
+  elements.bestScore.textContent = personalBestAvailable ? `${personalBest} PTS` : "N/A";
+}
+
+function loadPersonalBest() {
+  try {
+    const savedScore = window.localStorage.getItem(PERSONAL_BEST_KEY);
+    if (savedScore !== null) {
+      const parsedScore = Number(savedScore);
+      if (!Number.isInteger(parsedScore) || parsedScore < 0 || parsedScore > MAX_ROUND_POINTS) {
+        throw new Error("Saved personal best is not a valid score.");
+      }
+      personalBest = parsedScore;
+    }
+  } catch (error) {
+    personalBestAvailable = false;
+    console.error("Could not load the personal best from local storage.", error);
+  }
+  updatePersonalBestDisplay();
+}
+
+function savePersonalBestIfBeaten() {
+  if (!personalBestAvailable || scorePoints <= personalBest) return false;
+  try {
+    window.localStorage.setItem(PERSONAL_BEST_KEY, String(scorePoints));
+    personalBest = scorePoints;
+    updatePersonalBestDisplay();
+    return true;
+  } catch (error) {
+    personalBestAvailable = false;
+    updatePersonalBestDisplay();
+    console.error("Could not save the personal best to local storage.", error);
+    return false;
+  }
+}
+
+function selectBalancedQuestions(selectedAreas, difficulty) {
+  const categories = [...selectedAreas]
+    .map((category) => ({
+      category,
+      questions: shuffle(questions.filter((question) => (
+        question.category === category && question.difficulty === difficulty
+      ))),
+      selected: 0,
+    }))
+    .filter((group) => group.questions.length > 0);
+  const selectedQuestions = [];
+
+  while (selectedQuestions.length < QUESTIONS_PER_ROUND) {
+    const available = categories.filter((group) => group.questions.length > 0);
+    const fewestSelected = Math.min(...available.map((group) => group.selected));
+    const candidates = available.filter((group) => group.selected === fewestSelected);
+    const group = candidates[Math.floor(Math.random() * candidates.length)];
+    selectedQuestions.push(group.questions.pop());
+    group.selected += 1;
+  }
+
+  return shuffle(selectedQuestions);
+}
+
+function startGame() {
+  const selectedAreas = getSelectedAreas();
   if (selectedAreas.size === 0) {
     elements.areaSelectionError.hidden = false;
+    elements.areaSelectionError.focus();
     return;
   }
 
-  const eligibleQuestions = questions.filter((question) => selectedAreas.has(question.category));
+  const selectedDifficulty = elements.difficulty.value;
+  const eligibleQuestions = getEligibleQuestions(selectedAreas);
   if (eligibleQuestions.length < QUESTIONS_PER_ROUND) {
-    elements.areaSelectionError.textContent = "There aren't enough questions in those areas for a round.";
+    elements.areaSelectionError.textContent = `There aren't enough ${selectedDifficulty.toLowerCase()} questions in those areas for a round.`;
     elements.areaSelectionError.hidden = false;
+    elements.areaSelectionError.focus();
     return;
   }
 
   elements.areaSelectionError.hidden = true;
-  roundQuestions = shuffle(eligibleQuestions).slice(0, QUESTIONS_PER_ROUND);
+  roundQuestions = selectBalancedQuestions(selectedAreas, selectedDifficulty);
   questionIndex = 0;
   correctAnswers = 0;
+  scorePoints = 0;
+  currentStreak = 0;
+  locked = false;
   answerResults = [];
   elements.status.textContent = "ROUND IN PROGRESS";
   updateScoreboard();
   showScreen(elements.question);
   renderQuestion();
+  elements.questionText.focus();
 }
 
 function renderQuestion() {
@@ -134,7 +250,12 @@ function renderQuestion() {
   locked = false;
   elements.questionNumber.textContent = `QUESTION ${String(questionIndex + 1).padStart(2, "0")} / ${String(QUESTIONS_PER_ROUND).padStart(2, "0")}`;
   elements.category.textContent = question.category.toUpperCase();
+  elements.difficultyLabel.textContent = question.difficulty.toUpperCase();
   elements.questionText.textContent = question.question;
+  elements.questionText.setAttribute(
+    "aria-label",
+    `${question.category}, ${question.difficulty}. ${question.question}`,
+  );
   elements.feedbackRow.hidden = true;
   elements.feedbackCopy.className = "feedback-copy";
   elements.answers.replaceChildren();
@@ -156,8 +277,16 @@ function submitAnswer(choice) {
   locked = true;
   const question = roundQuestions[questionIndex];
   const isCorrect = choice === question.answer.trim().toUpperCase();
-  if (isCorrect) correctAnswers += 1;
-  answerResults.push(isCorrect);
+  let pointsAwarded = 0;
+  if (isCorrect) {
+    correctAnswers += 1;
+    currentStreak += 1;
+    pointsAwarded = POINTS_PER_ANSWER + (currentStreak > 1 ? STREAK_BONUS : 0);
+    scorePoints += pointsAwarded;
+  } else {
+    currentStreak = 0;
+  }
+  answerResults.push({ question, choice, isCorrect });
   updateScoreboard();
 
   elements.answers.querySelectorAll(".answer-option").forEach((button) => {
@@ -172,8 +301,11 @@ function submitAnswer(choice) {
   });
 
   elements.feedbackCopy.classList.add(isCorrect ? "is-correct" : "is-wrong");
-  elements.feedbackTitle.textContent = isCorrect ? "That's right." : `The answer was ${question.answer.trim().toUpperCase()}.`;
+  elements.feedbackTitle.textContent = isCorrect
+    ? `Correct: ${question[question.answer.trim().toUpperCase()]}. +${pointsAwarded} points${currentStreak > 1 ? `, including a +${STREAK_BONUS} streak bonus` : ""}.`
+    : `Not quite. The correct answer is ${question[question.answer.trim().toUpperCase()]}.`;
   elements.explanation.textContent = question.explanation;
+  announce(`${isCorrect ? "Correct." : "Not quite."} Score: ${scorePoints} points. ${answeredQuestionCount()} of ${QUESTIONS_PER_ROUND} questions answered.${currentStreak > 0 ? ` Current streak: ${currentStreak}.` : ""}`);
   elements.next.innerHTML = questionIndex === QUESTIONS_PER_ROUND - 1
     ? 'SEE RESULTS <span aria-hidden="true">→</span>'
     : 'NEXT <span aria-hidden="true">→</span>';
@@ -189,15 +321,50 @@ function showResults() {
   elements.resultTitle.textContent = percentage === 100
     ? "Perfect score."
     : percentage >= 60 ? "Nice work." : "Keep exploring.";
-  elements.resultCopy.textContent = `You got ${correctAnswers} out of ${QUESTIONS_PER_ROUND} questions right. There is always more to discover.`;
-  elements.resultSummary.replaceChildren(...answerResults.map((isCorrect) => {
+  const newPersonalBest = savePersonalBestIfBeaten();
+  const bestCopy = personalBestAvailable ? ` Personal best: ${personalBest} points.` : " Personal best storage is unavailable.";
+  elements.resultCopy.textContent = `You got ${correctAnswers} out of ${QUESTIONS_PER_ROUND} questions right and scored ${scorePoints} points.${newPersonalBest ? " New personal best!" : bestCopy}`;
+  elements.resultSummary.replaceChildren(...answerResults.map(({ isCorrect }) => {
     const mark = document.createElement("span");
     mark.className = `result-mark ${isCorrect ? "correct" : "incorrect"}`;
     mark.setAttribute("aria-label", isCorrect ? "Correct" : "Incorrect");
     return mark;
   }));
+  const missedAnswers = answerResults.filter(({ isCorrect }) => !isCorrect);
+  elements.missedReview.hidden = missedAnswers.length === 0;
+  elements.missedReviewList.replaceChildren(...missedAnswers.map(({ question, choice }) => {
+    const item = document.createElement("article");
+    item.className = "missed-review-item";
+
+    const category = document.createElement("span");
+    category.className = "missed-review-category";
+    category.textContent = question.category;
+
+    const prompt = document.createElement("h3");
+    prompt.textContent = question.question;
+
+    const yourAnswer = document.createElement("p");
+    yourAnswer.className = "missed-review-answer";
+    yourAnswer.textContent = `Your answer: ${question[choice]}`;
+
+    const correctAnswer = document.createElement("p");
+    correctAnswer.className = "missed-review-correct";
+    correctAnswer.textContent = `Correct answer: ${question[question.answer.trim().toUpperCase()]}`;
+
+    const explanation = document.createElement("p");
+    explanation.className = "missed-review-explanation";
+    explanation.textContent = question.explanation;
+
+    item.append(category, prompt, yourAnswer, correctAnswer, explanation);
+    return item;
+  }));
   elements.status.textContent = "ROUND COMPLETE";
   showScreen(elements.results);
+  elements.resultTitle.focus();
+}
+
+function answeredQuestionCount() {
+  return Math.min(questionIndex + (locked ? 1 : 0), QUESTIONS_PER_ROUND);
 }
 
 elements.next.addEventListener("click", () => {
@@ -206,8 +373,10 @@ elements.next.addEventListener("click", () => {
     return;
   }
   questionIndex += 1;
+  locked = false;
   updateScoreboard();
   renderQuestion();
+  elements.questionText.focus();
 });
 
 document.querySelector("#start-button").addEventListener("click", startGame);
@@ -215,22 +384,37 @@ document.querySelector("#play-again-button").addEventListener("click", startGame
 document.querySelectorAll('input[name="science-area"]').forEach((input) => {
   input.addEventListener("change", () => {
     elements.areaSelectionError.hidden = true;
+    updateQuestionPoolCount();
   });
+});
+elements.difficulty.addEventListener("change", () => {
+  elements.areaSelectionError.hidden = true;
+  updateQuestionPoolCount();
 });
 document.querySelector("#reset-button").addEventListener("click", () => {
   correctAnswers = 0;
+  scorePoints = 0;
+  currentStreak = 0;
   questionIndex = 0;
+  locked = false;
   elements.status.textContent = "READY WHEN YOU ARE";
   updateScoreboard();
   showScreen(elements.welcome);
+  document.querySelector("#start-button").focus();
 });
+
+loadPersonalBest();
 
 document.addEventListener("keydown", (event) => {
   if (elements.question.hidden) return;
+  const target = event.target;
+  if (
+    event.altKey || event.ctrlKey || event.metaKey || event.isComposing
+    || target instanceof HTMLElement
+      && (target.isContentEditable || target.matches("button, input, select, textarea, a"))
+  ) return;
   if (!locked && /^[a-d]$/i.test(event.key)) {
     submitAnswer(event.key.toUpperCase());
-  } else if (locked && event.key === "Enter") {
-    elements.next.click();
   }
 });
 
@@ -241,10 +425,14 @@ fetch("questions.csv")
   })
   .then((csv) => {
     questions = parseCsv(csv);
-    elements.poolCount.textContent = `${questions.length} QUESTIONS IN POOL`;
+    const invalidDifficulty = questions.some((question) => !DIFFICULTIES.includes(question.difficulty));
+    if (invalidDifficulty) {
+      throw new Error("Every question must have an Easy, Medium, or Hard difficulty in questions.csv.");
+    }
     if (questions.length < QUESTIONS_PER_ROUND) {
       throw new Error(`Add at least ${QUESTIONS_PER_ROUND} questions to questions.csv.`);
     }
+    updateQuestionPoolCount();
     elements.loading.hidden = true;
     showScreen(elements.welcome);
   })

@@ -4,7 +4,11 @@ This folder contains **two ways to play the same science trivia game**: a browse
 
 ## The trivia game
 
-The game covers biology, chemistry, physics, and Earth science. Each round asks five randomly selected questions from the question bank. Choose which science areas to include before the round starts; all four are selected by default. After each answer, the game shows whether it was correct and provides an explanation.
+The game covers biology, chemistry, physics, and Earth science. Each round asks five questions from the question bank. Choose which science areas to include before the round starts; all four are selected by default.
+
+The browser game lets you choose Easy, Medium, or Hard questions and balances each round as evenly as possible across your selected science areas. Correct answers are worth 20 points, with a 5-point bonus for each correct answer after the first in a consecutive streak. Your best round score is saved in your browser's local storage. The browser game also supports skip navigation, keyboard answer shortcuts, visible focus, screen-reader announcements for answers and progress, and a review of missed questions at the end of a round.
+
+The command-line game asks from the selected science areas and reports your percentage score.
 
 ### Option 1: Play in a browser
 
