@@ -2,6 +2,8 @@
 
 This folder contains **two ways to play the same science trivia game**: a browser game and a command-line game. Both use the questions in `questions.csv`. There is also a separate DNA-composition practice exercise in `training/`.
 
+For a separate quiz about the **history of the Weizmann Institute of Science**, see [the Weizmann history trivia game](weizmann_history_trivia/README.md).
+
 ## The trivia game
 
 The game covers biology, chemistry, physics, and Earth science. Each round asks five questions from the question bank. Choose which science areas to include before the round starts; all four are selected by default.
