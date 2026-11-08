@@ -85,8 +85,3 @@ Prompts used with AI in VS Code:
 - "Let players choose which science categories to include in a trivia round."
 - "Review the science question bank for ambiguous wording, weak distractors, factual nuance, and explanations that need more context."
 
-I reviewed the questions and tried the program, including invalid answer input.
-
-## GitHub issue
-
-[Add a basic science trivia game for Day 03](https://github.com/eladit6789/wis-python-course-assignments/issues/new?title=Day%2003%3A%20Basic%20Science%20Trivia)
