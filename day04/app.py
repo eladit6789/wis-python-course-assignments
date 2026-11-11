@@ -5,6 +5,7 @@ import secrets
 from flask import Flask, abort, flash, redirect, render_template, request, session, url_for
 
 from science_trivia import CHOICES, QUESTIONS_PER_GAME, calculate_score, load_questions
+from training.dna_composition import calculate_percentages
 
 
 app = Flask(__name__)
@@ -39,6 +40,27 @@ def get_game_questions():
 @app.get("/")
 def index():
     return render_setup()
+
+
+@app.route("/dna", methods=["GET", "POST"])
+def dna_calculator():
+    sequence = ""
+    percentages = None
+    error = None
+
+    if request.method == "POST":
+        sequence = request.form.get("sequence", "")
+        try:
+            percentages = calculate_percentages(sequence)
+        except ValueError as exc:
+            error = str(exc)
+
+    return render_template(
+        "dna.html",
+        sequence=sequence,
+        percentages=percentages,
+        error=error,
+    )
 
 
 @app.post("/start")

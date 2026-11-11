@@ -14,6 +14,26 @@ class TriviaWebAppTests(unittest.TestCase):
         for category in trivia_app.CATEGORIES:
             self.assertIn(category.encode(), response.data)
 
+    def test_dna_calculator_shows_composition(self):
+        response = self.client.post("/dna", data={"sequence": "AACCGT\n"})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"<title>DNA Composition Calculator</title>", response.data)
+        self.assertIn(b"33.33%", response.data)
+        self.assertIn(b"CG", response.data)
+        self.assertIn(b"AT", response.data)
+        self.assertIn(b"50.00%", response.data)
+
+    def test_dna_calculator_shows_validation_errors(self):
+        for sequence, message in (
+            ("", "The DNA sequence cannot be empty."),
+            ("ACGTN", "Invalid DNA characters: N"),
+        ):
+            with self.subTest(sequence=sequence):
+                response = self.client.post("/dna", data={"sequence": sequence})
+                self.assertEqual(response.status_code, 200)
+                self.assertIn(message.encode(), response.data)
+                self.assertNotIn(b"Nucleotide percentages", response.data)
+
     def test_round_uses_shared_question_bank_and_score_logic(self):
         response = self.client.post("/start", data={"categories": "Biology"})
         self.assertEqual(response.status_code, 302)

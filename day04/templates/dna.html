@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DNA Composition Calculator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <main class="panel">
+      <p class="eyebrow">DAY 04 · DNA COMPOSITION</p>
+      <h1>DNA <span>Calculator</span></h1>
+      <p class="intro">Enter a DNA sequence to calculate the percentage of each nucleotide and the combined CG and AT content.</p>
+
+      {% if error %}
+        <p class="message error" role="alert">{{ error }}</p>
+      {% endif %}
+
+      <form action="{{ url_for('dna_calculator') }}" method="post">
+        <label for="sequence"><strong>DNA sequence</strong></label>
+        <textarea id="sequence" name="sequence" rows="5" required aria-describedby="sequence-help">{{ sequence }}</textarea>
+        <p class="muted" id="sequence-help">Use one continuous sequence containing only A, C, G, and T. Leading and trailing whitespace is ignored.</p>
+        <button type="submit">Calculate composition <span aria-hidden="true">→</span></button>
+      </form>
+
+      {% if percentages %}
+        <section class="dna-results" aria-live="polite" aria-labelledby="results-title">
+          <h2 id="results-title">Nucleotide percentages</h2>
+          <dl class="percentage-list">
+            {% for base in "ACGT" %}
+              <div><dt>{{ base }}</dt><dd>{{ "%.2f"|format(percentages[base]) }}%</dd></div>
+            {% endfor %}
+            <div><dt>CG</dt><dd>{{ "%.2f"|format(percentages["CG"]) }}%</dd></div>
+            <div><dt>AT</dt><dd>{{ "%.2f"|format(percentages["AT"]) }}%</dd></div>
+          </dl>
+        </section>
+      {% endif %}
+
+      <p class="muted"><a href="{{ url_for('index') }}">← Back to Science Showdown</a></p>
+    </main>
+  </body>
+</html>

@@ -73,6 +73,25 @@ legend { margin-bottom: 12px; font-weight: 700; }
 input { accent-color: var(--blue); }
 .answer-letter { color: var(--blue); font-family: Consolas, monospace; font-weight: 700; }
 .question-title { font-size: clamp(1.7rem, 5vw, 2.8rem); line-height: 1.2; }
+textarea {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  padding: 12px;
+  color: var(--ink);
+  background: white;
+  font: 1rem/1.5 Consolas, monospace;
+  resize: vertical;
+}
+
+.dna-results { margin-top: 30px; border-top: 1px solid var(--line); padding-top: 12px; }
+.dna-results h2 { font-size: 1.25rem; }
+.percentage-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.percentage-list div { display: flex; justify-content: space-between; border: 1px solid var(--line); padding: 12px; }
+.percentage-list dt { color: var(--muted); font-family: Consolas, monospace; }
+.percentage-list dd { margin: 0; font-weight: 700; }
 
 button, .button-link {
   display: inline-flex;
