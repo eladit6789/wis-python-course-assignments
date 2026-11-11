@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Question {{ question_number }} — Science Showdown</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <main class="panel">
+      <p class="eyebrow">QUESTION {{ question_number }} / {{ total_questions }} · {{ question.category }}</p>
+      <h1 class="question-title">{{ question.question }}</h1>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <p class="message {{ category }}" role="alert">{{ message }}</p>
+        {% endfor %}
+      {% endwith %}
+
+      <form action="{{ url_for('submit_answer') }}" method="post">
+        <input type="hidden" name="question_index" value="{{ question_number - 1 }}">
+        <fieldset class="answers">
+          <legend>Choose your answer</legend>
+          {% for letter, text in question.choices %}
+            <label class="answer-option">
+              <input type="radio" name="answer" value="{{ letter }}" required>
+              <span class="answer-letter">{{ letter }}</span>
+              <span>{{ text }}</span>
+            </label>
+          {% endfor %}
+        </fieldset>
+        <button type="submit">Submit answer <span aria-hidden="true">→</span></button>
+      </form>
+      <p class="muted"><a href="{{ url_for('new_game') }}">End this round</a></p>
+    </main>
+  </body>
+</html>

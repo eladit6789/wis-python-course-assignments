@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Science Showdown — Start</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <main class="panel">
+      <p class="eyebrow">THE SCIENCE ARCADE · DAY 04</p>
+      <h1>Science <span>Showdown</span></h1>
+      <p class="intro">Choose your science areas, then take on five questions.</p>
+
+      {% if error %}
+        <p class="message error" role="alert">{{ error }}</p>
+      {% endif %}
+
+      <form action="{{ url_for('start_game') }}" method="post">
+        <fieldset>
+          <legend>Include science areas</legend>
+          {% for category in categories %}
+            <label class="category-option">
+              <input type="checkbox" name="categories" value="{{ category }}" checked>
+              <span>{{ category }}</span>
+            </label>
+          {% endfor %}
+        </fieldset>
+        <p class="muted">{{ question_count }} questions available · 5 questions per round</p>
+        <button type="submit">Start game <span aria-hidden="true">→</span></button>
+      </form>
+
+      <p class="old-game">The original command-line game is still available:
+        <code>python science_trivia.py</code>
+      </p>
+    </main>
+  </body>
+</html>

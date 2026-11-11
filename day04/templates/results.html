@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Results — Science Showdown</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <main class="panel">
+      <p class="eyebrow">FIELD TEST COMPLETE</p>
+      <h1>Your score: <span>{{ score }}%</span></h1>
+      <p class="intro">{{ correct_answers }} out of {{ total_questions }} correct.</p>
+
+      <section aria-label="Answer review">
+        {% for item in review %}
+          <article class="review-item">
+            <h2>{{ loop.index }}. {{ item.question }}</h2>
+            {% if item.correct %}
+              <p class="correct">Correct — {{ item.correct_answer }}</p>
+            {% else %}
+              <p class="incorrect">Your answer: {{ item.selected }}</p>
+              <p class="correct">Correct answer: {{ item.correct_answer }}</p>
+            {% endif %}
+            <p class="muted">{{ item.explanation }}</p>
+          </article>
+        {% endfor %}
+      </section>
+
+      <a class="button-link" href="{{ url_for('new_game') }}">Play again <span aria-hidden="true">→</span></a>
+    </main>
+  </body>
+</html>
