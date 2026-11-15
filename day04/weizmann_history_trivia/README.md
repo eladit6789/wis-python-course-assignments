@@ -1,6 +1,6 @@
 # Weizmann Institute History Quiz
 
-This folder contains a browser game and a command-line game about the history of the Weizmann Institute of Science. Both versions use `questions.csv`. Each round has five questions, and players can choose Easy, Medium, or Hard.
+This folder contains a browser game and a command-line game about the history of the Weizmann Institute of Science. The day04 Flask quiz app also includes this history quiz as a choice alongside the science quiz. All versions use `questions.csv`. Each round has five questions, and players can choose Easy, Medium, or Hard in the browser and command-line games.
 
 The 50-question bank covers the Institute's founding and early leadership, Chaim Weizmann, WEIZAC and the beginnings of computing in Israel, and later research and education milestones.
 
@@ -22,6 +22,17 @@ The browser game loads its question bank from a CSV file, so run it through a lo
 4. Stop the server with `Ctrl+C` when you are finished.
 
 Choose a difficulty, answer with the buttons or the A-D keys, and use **Next** to continue. Correct answers are worth 20 points, with a 5-point bonus for each correct answer after the first in a consecutive streak. The browser saves your best score in local storage and reviews missed questions at the end of a round.
+
+## Play in the day04 Flask quiz app
+
+The Flask app includes the history quiz alongside Science Showdown. From the repository root, install Flask and start the app:
+
+```text
+python -m pip install -r day04/requirements.txt
+python day04/app.py
+```
+
+Open <http://127.0.0.1:5000> and choose **Weizmann Institute history**. Each round draws five questions from this 50-question bank. See the [day04 app guide](../README.md) for details.
 
 ## Play in the command line
 
