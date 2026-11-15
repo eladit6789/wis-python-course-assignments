@@ -1,6 +1,7 @@
 import os
 import random
 import secrets
+from pathlib import Path
 
 from flask import Flask, abort, flash, redirect, render_template, request, session, url_for
 
@@ -11,6 +12,13 @@ from training.dna_composition import calculate_percentages
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("FLASK_SECRET_KEY") or secrets.token_hex(32)
 QUESTIONS = load_questions()
+HISTORY_QUESTIONS = load_questions(
+    Path(__file__).with_name("weizmann_history_trivia") / "questions.csv"
+)
+QUESTION_BANKS = {
+    "science": QUESTIONS,
+    "history": HISTORY_QUESTIONS,
+}
 CATEGORIES = sorted({question["category"] for question in QUESTIONS})
 
 
@@ -20,6 +28,7 @@ def render_setup(error=None, status=200):
             "index.html",
             categories=CATEGORIES,
             question_count=len(QUESTIONS),
+            history_question_count=len(HISTORY_QUESTIONS),
             error=error,
         ),
         status,
@@ -27,14 +36,19 @@ def render_setup(error=None, status=200):
 
 
 def get_game_questions():
+    question_bank = QUESTION_BANKS.get(session.get("question_bank"))
     indices = session.get("question_indices")
     if (
-        not isinstance(indices, list)
+        question_bank is None
+        or not isinstance(indices, list)
         or len(indices) != QUESTIONS_PER_GAME
-        or any(type(index) is not int or not 0 <= index < len(QUESTIONS) for index in indices)
+        or any(
+            type(index) is not int or not 0 <= index < len(question_bank)
+            for index in indices
+        )
     ):
         return None
-    return [QUESTIONS[index] for index in indices]
+    return [question_bank[index] for index in indices]
 
 
 @app.get("/")
@@ -65,22 +79,36 @@ def dna_calculator():
 
 @app.post("/start")
 def start_game():
-    selected_categories = set(request.form.getlist("categories"))
-    if not selected_categories or not selected_categories.issubset(CATEGORIES):
-        return render_setup("Choose at least one listed science area.", 400)
+    quiz_type = request.form.get("quiz_type", "science")
+    if quiz_type == "history":
+        eligible_indices = list(range(len(HISTORY_QUESTIONS)))
+    elif quiz_type == "science":
+        selected_categories = set(request.form.getlist("categories"))
+        if not selected_categories or not selected_categories.issubset(CATEGORIES):
+            return render_setup("Choose at least one listed science area.", 400)
 
-    eligible_indices = [
-        index
-        for index, question in enumerate(QUESTIONS)
-        if question["category"] in selected_categories
-    ]
+        eligible_indices = [
+            index
+            for index, question in enumerate(QUESTIONS)
+            if question["category"] in selected_categories
+        ]
+    else:
+        return render_setup("Choose a listed quiz.", 400)
+
+    question_bank = QUESTION_BANKS[quiz_type]
     if len(eligible_indices) < QUESTIONS_PER_GAME:
+        if quiz_type == "history":
+            return render_setup(
+                f"The institute history quiz needs at least {QUESTIONS_PER_GAME} questions.",
+                400,
+            )
         return render_setup(
             f"Choose areas with at least {QUESTIONS_PER_GAME} questions to start a round.",
             400,
         )
 
     session.clear()
+    session["question_bank"] = quiz_type
     session["question_indices"] = random.sample(eligible_indices, QUESTIONS_PER_GAME)
     session["question_index"] = 0
     session["answers"] = []

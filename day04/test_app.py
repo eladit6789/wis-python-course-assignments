@@ -1,3 +1,4 @@
+import html
 import unittest
 
 import app as trivia_app
@@ -67,6 +68,60 @@ class TriviaWebAppTests(unittest.TestCase):
         self.assertIn(b"Your score:", results.data)
         self.assertIn(b"<span>100%</span>", results.data)
         self.assertIn(b"5 out of 5 correct", results.data)
+
+    def test_history_quiz_uses_history_question_bank(self):
+        setup = self.client.get("/")
+        self.assertIn(b"Weizmann Institute history", setup.data)
+        self.assertIn(
+            f'{len(trivia_app.HISTORY_QUESTIONS)} questions available'.encode(),
+            setup.data,
+        )
+
+        response = self.client.post("/start", data={"quiz_type": "history"})
+        self.assertEqual(response.status_code, 302)
+
+        with self.client.session_transaction() as game_session:
+            self.assertEqual(game_session["question_bank"], "history")
+            indices = list(game_session["question_indices"])
+        history_categories = {
+            question["category"] for question in trivia_app.HISTORY_QUESTIONS
+        }
+        self.assertTrue(history_categories.isdisjoint(trivia_app.CATEGORIES))
+        self.assertEqual(len(indices), trivia_app.QUESTIONS_PER_GAME)
+        self.assertEqual(len(set(indices)), trivia_app.QUESTIONS_PER_GAME)
+        self.assertTrue(
+            all(
+                trivia_app.HISTORY_QUESTIONS[index]["category"]
+                in history_categories
+                for index in indices
+            )
+        )
+
+        for question_number, question_index in enumerate(indices):
+            question = trivia_app.HISTORY_QUESTIONS[question_index]
+            page = self.client.get("/play")
+            self.assertEqual(page.status_code, 200)
+            self.assertIn(
+                question["question"],
+                html.unescape(page.get_data(as_text=True)),
+            )
+            response = self.client.post(
+                "/answer",
+                data={
+                    "question_index": str(question_number),
+                    "answer": question["answer"],
+                },
+            )
+            self.assertEqual(response.status_code, 302)
+
+        results = self.client.get("/results")
+        self.assertEqual(results.status_code, 200)
+        self.assertIn(b"5 out of 5 correct", results.data)
+        for question_index in indices:
+            self.assertIn(
+                trivia_app.HISTORY_QUESTIONS[question_index]["question"],
+                html.unescape(results.get_data(as_text=True)),
+            )
 
     def test_start_rejects_empty_or_unknown_categories(self):
         for data in ({}, {"categories": "Unknown"}):

@@ -10,25 +10,40 @@
     <main class="panel">
       <p class="eyebrow">THE SCIENCE ARCADE · DAY 04</p>
       <h1>Science <span>Showdown</span></h1>
-      <p class="intro">Choose your science areas, then take on five questions.</p>
+      <p class="intro">Choose a quiz and take on five questions.</p>
 
       {% if error %}
         <p class="message error" role="alert">{{ error }}</p>
       {% endif %}
 
-      <form action="{{ url_for('start_game') }}" method="post">
-        <fieldset>
-          <legend>Include science areas</legend>
-          {% for category in categories %}
-            <label class="category-option">
-              <input type="checkbox" name="categories" value="{{ category }}" checked>
-              <span>{{ category }}</span>
-            </label>
-          {% endfor %}
-        </fieldset>
-        <p class="muted">{{ question_count }} questions available · 5 questions per round</p>
-        <button type="submit">Start game <span aria-hidden="true">→</span></button>
-      </form>
+      <section class="quiz-option">
+        <h2>Science trivia</h2>
+        <p>Choose science areas, then answer a mix of questions.</p>
+        <form action="{{ url_for('start_game') }}" method="post">
+          <input type="hidden" name="quiz_type" value="science">
+          <fieldset>
+            <legend>Include science areas</legend>
+            {% for category in categories %}
+              <label class="category-option">
+                <input type="checkbox" name="categories" value="{{ category }}" checked>
+                <span>{{ category }}</span>
+              </label>
+            {% endfor %}
+          </fieldset>
+          <p class="muted">{{ question_count }} questions available · 5 questions per round</p>
+          <button type="submit">Start science quiz <span aria-hidden="true">→</span></button>
+        </form>
+      </section>
+
+      <section class="quiz-option">
+        <h2>Weizmann Institute history</h2>
+        <p>Test your knowledge of the Institute's founding, Chaim Weizmann, and milestones.</p>
+        <p class="muted">{{ history_question_count }} questions available · 5 questions per round</p>
+        <form action="{{ url_for('start_game') }}" method="post">
+          <input type="hidden" name="quiz_type" value="history">
+          <button type="submit">Start history quiz <span aria-hidden="true">→</span></button>
+        </form>
+      </section>
 
       <p class="old-game">The original command-line game is still available:
         <code>python science_trivia.py</code>
