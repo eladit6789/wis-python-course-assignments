@@ -13,7 +13,7 @@ python -m pip install -r day04/requirements.txt
 python day04/app.py
 ```
 
-Open <http://127.0.0.1:5000> in a browser. Choose either the science trivia or the Weizmann Institute history quiz. The science quiz lets you select one or more science areas; both quizzes ask five questions and show your score and answer review when the round is complete. The history quiz uses `weizmann_history_trivia/questions.csv`.
+Open <http://127.0.0.1:5000> in a browser. Choose either the science trivia or the Weizmann Institute history quiz. The science quiz lets you select one or more science areas; both quizzes ask five questions and show your score and answer review when the round is complete. The history quiz draws from a 50-question bank covering the Institute's founding and early leadership, Chaim Weizmann, WEIZAC, and later research and education milestones. It uses `weizmann_history_trivia/questions.csv`.
 
 ## Run the separate DNA calculator app
 
@@ -50,7 +50,7 @@ python -m unittest discover -s day04 -p "test_*.py"
 - `templates/` and `static/` — server-rendered game, calculator pages, and styles.
 - `science_trivia.py` — preserved command-line implementation and shared business logic.
 - `questions.csv` — copied question bank used by both Python game interfaces.
-- `weizmann_history_trivia/questions.csv` — question bank for the Institute history quiz in the Flask app.
+- `weizmann_history_trivia/questions.csv` — 50-question bank for the Institute history quiz in the Flask app.
 - `test_app.py` and `test_dna_app.py` — tests for the quiz and calculator apps.
 - `science_trivia.html`, `science_trivia.js`, and `science_trivia.css` — preserved day 3 browser version.
 - `README-day03.md` — the original day 3 instructions.

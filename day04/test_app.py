@@ -103,6 +103,13 @@ class TriviaWebAppTests(unittest.TestCase):
                 html.unescape(results.get_data(as_text=True)),
             )
 
+    def test_history_question_bank_is_substantially_expanded(self):
+        question_texts = [
+            question["question"] for question in trivia_app.HISTORY_QUESTIONS
+        ]
+        self.assertGreaterEqual(len(question_texts), 50)
+        self.assertEqual(len(set(question_texts)), len(question_texts))
+
     def test_start_rejects_empty_or_unknown_categories(self):
         for data in ({}, {"categories": "Unknown"}):
             with self.subTest(data=data):

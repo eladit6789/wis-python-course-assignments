@@ -2,7 +2,7 @@
 
 This folder contains **two ways to play the same science trivia game**: a browser game and a command-line game. Both use the questions in `questions.csv`. There is also a separate DNA-composition practice exercise in `training/`.
 
-For a separate quiz about the **history of the Weizmann Institute of Science**, see [the Weizmann history trivia game](weizmann_history_trivia/README.md).
+For a separate quiz about the **history of the Weizmann Institute of Science**, see [the Weizmann history trivia game](weizmann_history_trivia/README.md). Its question bank has grown to 50 questions covering the Institute's founding and early leadership, Chaim Weizmann, WEIZAC, and later research and education milestones. Each round still asks five questions.
 
 ## The trivia game
 
@@ -84,4 +84,3 @@ Prompts used with AI in VS Code:
 - "Polish the browser game's visual design with category color accents and clearer answer and feedback cards."
 - "Let players choose which science categories to include in a trivia round."
 - "Review the science question bank for ambiguous wording, weak distractors, factual nuance, and explanations that need more context."
-

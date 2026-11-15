@@ -2,7 +2,7 @@
 
 This folder contains a browser game and a command-line game about the history of the Weizmann Institute of Science. Both versions use `questions.csv`. Each round has five questions, and players can choose Easy, Medium, or Hard.
 
-The questions cover the Institute's founding as the Daniel Sieff Research Institute in Rehovot in 1934, Chaim Weizmann, the 1949 renaming, and early research milestones such as WEIZAC.
+The 50-question bank covers the Institute's founding and early leadership, Chaim Weizmann, WEIZAC and the beginnings of computing in Israel, and later research and education milestones.
 
 ## Play in a browser
 
@@ -41,4 +41,7 @@ Use `py -3` on Windows or `python3` on macOS or Linux if that is your Python 3 c
 
 ## Sources
 
-- [Weizmann Institute of Science — Wikipedia history overview](https://en.wikipedia.org/wiki/Weizmann_Institute_of_Science#History), including the founding, naming, Chaim Weizmann, and WEIZAC milestones.
+- [Weizmann Institute of Science — history overview](https://en.wikipedia.org/wiki/Weizmann_Institute_of_Science#History), including its founding, renaming, and later milestones.
+- [WEIZAC](https://en.wikipedia.org/wiki/WEIZAC), including its development, scientific uses, and operating history; the article cites Institute and IEEE history sources.
+- [Weizmann Institute — Computer Studies](https://wis-wander.weizmann.ac.il/content/computer-studies#%20The%20first%20computers), on the Institute's early computing history.
+- [American Committee for the Weizmann Institute — Remembering WEIZAC](https://www.weizmann-usa.org/news-media/in-the-news/remembering-weizac-the-beginning-of-computing-in-israel/).
