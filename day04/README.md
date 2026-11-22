@@ -37,11 +37,13 @@ python day04/science_trivia.py
 
 It uses the copied `questions.csv` file and remains separate from the Flask interface.
 
-## Run the web app tests
+## Run the Day 04 tests
 
 ```text
 python -m unittest discover -s day04 -p "test_*.py"
 ```
+
+On Windows, use the same interpreter as the app: `& $python -m unittest discover -s day04 -p "test_*.py"`.
 
 ## Files
 
@@ -51,7 +53,9 @@ python -m unittest discover -s day04 -p "test_*.py"
 - `science_trivia.py` — preserved command-line implementation and shared business logic.
 - `questions.csv` — copied question bank used by both Python game interfaces.
 - `weizmann_history_trivia/questions.csv` — 50-question bank for the Institute history quiz in the Flask app.
-- `test_app.py` and `test_dna_app.py` — tests for the quiz and calculator apps.
+- `test_app.py` — tests for the Flask quiz.
+- `test_dna_app.py` — tests for the DNA calculator.
+- `test_science_trivia.py` — business-logic tests for question loading and validation, scoring, category selection, answers, and game rounds.
 - `science_trivia.html`, `science_trivia.js`, and `science_trivia.css` — preserved day 3 browser version.
 - `README-day03.md` — the original day 3 instructions.
 - `weizmann_history_trivia/` and `training/` — preserved day 3 project and practice files.

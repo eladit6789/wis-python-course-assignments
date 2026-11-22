@@ -27,9 +27,13 @@ def load_questions(file_path=QUESTIONS_FILE):
         raise ValueError("The question file is empty or has missing columns.")
 
     for question in questions:
-        if question["answer"].strip().upper() not in CHOICES:
+        answer = question["answer"]
+        if not answer or answer.strip().upper() not in CHOICES:
             raise ValueError("Each question's answer must be A, B, C, or D.")
-        if any(not question[field].strip() for field in required_fields):
+        if any(
+            not question[field] or not question[field].strip()
+            for field in required_fields
+        ):
             raise ValueError("Question fields cannot be empty.")
 
     return questions
