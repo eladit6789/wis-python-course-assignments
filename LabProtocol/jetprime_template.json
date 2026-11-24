@@ -1,0 +1,206 @@
+{
+  "module_id": "jetprime_transfection",
+  "module_version": 1,
+  "protocol_name": "Cell Transfection - JetPRIME",
+  "defaults": {
+    "technical_replicates": 1,
+    "jetprime_ratio": 2,
+    "preparation_excess_percent": 10,
+    "incubation_time_hours": null,
+    "temperature_celsius": 37,
+    "co2_percent": 5
+  },
+  "manufacturer_settings": {
+    "recommended_confluency": "60-80%",
+    "recommended_incubation_time_hours": null,
+    "room_temperature_incubation_minutes": 10,
+    "jetprime_ratio_min_ul_per_ug": 2,
+    "jetprime_ratio_max_ul_per_ug": 3,
+    "manufacturer_protocol": {
+      "source_label": "Sartorius jetPRIME Short Protocol - DNA Transfection",
+      "source_status": "09/2024",
+      "source_url": "https://api.sartorius.com/document-hub/dam/download/281324/DNA-Transfection-Reagent-jetPRIME-Short-Protocol-en-Sartorius.pdf",
+      "cell_seeding": {
+        "96_well_plate": {
+          "minimum_cells_per_vessel": 7500,
+          "maximum_cells_per_vessel": 10000,
+          "medium_volume_ml_per_vessel": 0.1
+        },
+        "24_well_plate": {
+          "minimum_cells_per_vessel": 50000,
+          "maximum_cells_per_vessel": 80000,
+          "medium_volume_ml_per_vessel": 0.5
+        },
+        "12_well_plate": {
+          "minimum_cells_per_vessel": 80000,
+          "maximum_cells_per_vessel": 150000,
+          "medium_volume_ml_per_vessel": 1
+        },
+        "6_well_plate": {
+          "minimum_cells_per_vessel": 150000,
+          "maximum_cells_per_vessel": 250000,
+          "medium_volume_ml_per_vessel": 2
+        },
+        "100_mm_dish": {
+          "minimum_cells_per_vessel": 1000000,
+          "maximum_cells_per_vessel": 2000000,
+          "medium_volume_ml_per_vessel": 10
+        }
+      },
+      "dna_transfection": {
+        "serum_during_transfection": true,
+        "buffer_name": "jetPRIME buffer",
+        "dna_dilution_vortex_seconds": 10,
+        "complex_vortex_seconds": 1,
+        "complex_incubation_minutes": 10,
+        "complex_incubation_temperature": "room temperature",
+        "cell_incubation_minimum_hours": 24,
+        "cell_incubation_maximum_hours": 48
+      }
+    },
+    "culture_formats": {
+      "96_well_plate": {
+        "label": "96-well plate",
+        "count_unit": "plates",
+        "vessels_per_unit": 96,
+        "layout": {
+          "rows": 8,
+          "columns": 12,
+          "container_label": "Plate"
+        },
+        "buffer_volume_per_reaction_ul": 10,
+        "recommended_nucleic_acid_ug_per_reaction": 0.1,
+        "jetprime_volume_min_ul_per_reaction": 0.2,
+        "jetprime_volume_max_ul_per_reaction": 0.3,
+        "status": "verified",
+        "source_url": "https://api.sartorius.com/document-hub/dam/download/281324/DNA-Transfection-Reagent-jetPRIME-Short-Protocol-en-Sartorius.pdf"
+      },
+      "24_well_plate": {
+        "label": "24-well plate",
+        "count_unit": "plates",
+        "vessels_per_unit": 24,
+        "layout": {
+          "rows": 4,
+          "columns": 6,
+          "container_label": "Plate"
+        },
+        "buffer_volume_per_reaction_ul": 50,
+        "recommended_nucleic_acid_ug_per_reaction": 0.5,
+        "jetprime_volume_min_ul_per_reaction": 1,
+        "jetprime_volume_max_ul_per_reaction": 1.5,
+        "status": "verified",
+        "source_url": "https://api.sartorius.com/document-hub/dam/download/281324/DNA-Transfection-Reagent-jetPRIME-Short-Protocol-en-Sartorius.pdf"
+      },
+      "12_well_plate": {
+        "label": "12-well plate",
+        "count_unit": "plates",
+        "vessels_per_unit": 12,
+        "layout": {
+          "rows": 3,
+          "columns": 4,
+          "container_label": "Plate"
+        },
+        "buffer_volume_per_reaction_ul": 75,
+        "recommended_nucleic_acid_ug_per_reaction": 0.8,
+        "jetprime_volume_min_ul_per_reaction": 1.6,
+        "jetprime_volume_max_ul_per_reaction": 2.4,
+        "status": "verified",
+        "source_url": "https://api.sartorius.com/document-hub/dam/download/281324/DNA-Transfection-Reagent-jetPRIME-Short-Protocol-en-Sartorius.pdf"
+      },
+      "6_well_plate": {
+        "label": "6-well plate",
+        "count_unit": "plates",
+        "vessels_per_unit": 6,
+        "layout": {
+          "rows": 2,
+          "columns": 3,
+          "container_label": "Plate"
+        },
+        "buffer_volume_per_reaction_ul": 200,
+        "recommended_nucleic_acid_ug_per_reaction": 2,
+        "jetprime_volume_min_ul_per_reaction": 4,
+        "jetprime_volume_max_ul_per_reaction": 6,
+        "status": "verified",
+        "source_url": "https://api.sartorius.com/document-hub/dam/download/281324/DNA-Transfection-Reagent-jetPRIME-Short-Protocol-en-Sartorius.pdf"
+      },
+      "60_mm_dish": {
+        "label": "60 mm dish",
+        "count_unit": "dishes",
+        "vessels_per_unit": 1,
+        "layout": {
+          "rows": 1,
+          "columns": 1,
+          "container_label": "Dish",
+          "position_prefix": "Dish"
+        },
+        "buffer_volume_per_reaction_ul": null,
+        "recommended_nucleic_acid_ug_per_reaction": null,
+        "jetprime_volume_min_ul_per_reaction": null,
+        "jetprime_volume_max_ul_per_reaction": null,
+        "status": "requires_confirmation",
+        "source_url": "https://fnkprddata.blob.core.windows.net/domestic/data/datasheet/PPU/101000001.pdf"
+      },
+      "100_mm_dish": {
+        "label": "100 mm dish",
+        "count_unit": "dishes",
+        "vessels_per_unit": 1,
+        "layout": {
+          "rows": 1,
+          "columns": 1,
+          "container_label": "Dish",
+          "position_prefix": "Dish"
+        },
+        "buffer_volume_per_reaction_ul": 500,
+        "recommended_nucleic_acid_ug_per_reaction": 10,
+        "jetprime_volume_min_ul_per_reaction": 20,
+        "jetprime_volume_max_ul_per_reaction": 30,
+        "status": "verified",
+        "source_url": "https://api.sartorius.com/document-hub/dam/download/282461/DNA-siRNA-Transfection-Reagent-jetPRIME-Protocol-en-Sartorius.pdf"
+      },
+      "150_mm_dish": {
+        "label": "150 mm dish",
+        "count_unit": "dishes",
+        "vessels_per_unit": 1,
+        "layout": {
+          "rows": 1,
+          "columns": 1,
+          "container_label": "Dish",
+          "position_prefix": "Dish"
+        },
+        "buffer_volume_per_reaction_ul": null,
+        "recommended_nucleic_acid_ug_per_reaction": null,
+        "jetprime_volume_min_ul_per_reaction": null,
+        "jetprime_volume_max_ul_per_reaction": null,
+        "status": "requires_confirmation",
+        "source_url": null
+      }
+    }
+  },
+  "experiment_settings": {
+    "strains": [],
+    "treatments": [],
+    "technical_replicates": 1,
+    "culture_format": null
+  },
+  "experimental_groups": [],
+  "manufacturer_verified_procedure": [
+    {
+      "title": "Cell confluency",
+      "text": "Transfect cells when they are 60-80% confluent.",
+      "source_url": "https://api.sartorius.com/document-hub/dam/download/281324/DNA-Transfection-Reagent-jetPRIME-Short-Protocol-en-Sartorius.pdf"
+    }
+  ],
+  "manufacturer_procedure_confirmations": [
+    "The DNA short protocol does not provide cell-seeding or medium-volume values for 60 mm or 150 mm dishes.",
+    "The short protocol's detailed steps cover DNA transfection; it directs users to the complete protocol for siRNA-only or DNA/siRNA co-transfection."
+  ],
+  "checklist_items": [
+    "Confirm cells are healthy and at the recommended confluency.",
+    "Confirm the culture format and its manufacturer-specific reagent values.",
+    "Label one master-mix tube per treatment.",
+    "Prepare each treatment master mix separately using the displayed calculations.",
+    "Verify the manufacturer mixing order and complex incubation time.",
+    "Record the experiment date and incubation settings."
+  ],
+  "include_checklist": true
+}

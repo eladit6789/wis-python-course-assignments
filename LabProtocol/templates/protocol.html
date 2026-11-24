@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ protocol_name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 32px auto;
+            padding: 24px;
+            color: #263445;
+            background: #f4f6f9;
+        }
+
+        header, section {
+            background: white;
+            border: 1px solid #d5dce5;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            padding: 20px;
+        }
+
+        h1, h2, h3 {
+            color: #243b53;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin: 12px 0;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #c8d0d9;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #eef2f6;
+        }
+
+        .warning {
+            background: #fff4d6;
+            border: 1px solid #e6c46a;
+            border-radius: 6px;
+            margin: 12px 0;
+            padding: 14px;
+        }
+
+        .status {
+            color: #8a4b08;
+            font-weight: bold;
+        }
+
+        .download-button {
+            background: #245b8f;
+            border: 0;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 11px 16px;
+        }
+
+        @media print {
+            body {
+                background: white;
+                margin: 0;
+                max-width: none;
+                padding: 0;
+            }
+
+            header, section {
+                border: 0;
+                break-inside: avoid;
+                padding: 10px 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>{{ protocol_name }}</h1>
+        <p>Cell Transfection - {{ reagent_name }}</p>
+        <p><strong>Experimental date:</strong>
+            {{ experimental_date or "Not specified" }}</p>
+    </header>
+
+    {% if procedure_confirmations or culture_format_settings.status == "requires_confirmation" %}
+    <div class="warning" role="note">
+        <strong>Review before use.</strong>
+        This generated document includes items that still need confirmation
+        against the current manufacturer instructions.
+    </div>
+    {% endif %}
+
+    <section>
+        <h2>1. Experiment Overview</h2>
+        <table>
+            <tr><th>Cell strains</th><td>{{ submitted_strains|join(", ") }}</td></tr>
+            <tr><th>Treatments</th><td>{{ submitted_treatments|join(", ") }}</td></tr>
+            <tr><th>Experimental groups</th><td>{{ experimental_groups|length }}</td></tr>
+            <tr><th>Total experimental vessels</th><td>{{ total_wells }}</td></tr>
+            <tr><th>Culture format</th><td>{{ culture_format_settings.label }}</td></tr>
+            <tr>
+                <th>Vessels to prepare</th>
+                <td>{{ culture_unit_count_label }}</td>
+            </tr>
+        </table>
+
+        <h3>Experimental Groups</h3>
+        <table>
+            <tr>
+                <th>Cell strain</th>
+                <th>Treatment</th>
+                <th>Wells in group</th>
+            </tr>
+            {% for group in experimental_groups %}
+            <tr>
+                <td>{{ group.strain }}</td>
+                <td>{{ group.treatment }}</td>
+                <td>{{ group.technical_replicates }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </section>
+
+    <section>
+        <h2>2. Treatment-Specific Master Mixes</h2>
+        <p>
+            Keep treatment mixes separate. Each mix supplies all strains
+            receiving that treatment.
+        </p>
+
+        {% for config in treatment_configs %}
+        <h3>{{ config.treatment }}</h3>
+        <p><strong>Strains:</strong> {{ submitted_strains|join(", ") }}</p>
+        <p><strong>Experimental vessels:</strong> {{ config.number_of_wells }}</p>
+        <p>
+            <strong>Reaction-equivalents to prepare:</strong>
+            {{ config.master_mix.preparation_wells }}
+        </p>
+
+        {% if config.master_mix.nucleic_acids %}
+        <table>
+            <tr>
+                <th>Nucleic acid</th>
+                <th>Amount per vessel (ng)</th>
+                <th>Stock (ng/µL)</th>
+                <th>Volume per vessel (µL)</th>
+                <th>Total volume (µL)</th>
+            </tr>
+            {% for acid in config.master_mix.nucleic_acids %}
+            <tr>
+                <td>{{ acid.name }}</td>
+                <td>{{ "%.3f"|format(acid.amount_per_well_ng) }}</td>
+                <td>{{ "%.3f"|format(acid.stock_concentration_ng_per_ul) }}</td>
+                <td>{{ "%.3f"|format(acid.volume_per_well_ul) }}</td>
+                <td>{{ "%.3f"|format(acid.total_volume_ul) }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <p>No nucleic acids were entered for this treatment.</p>
+        {% endif %}
+
+        <table>
+            <tr><th>Total nucleic acid per vessel</th><td>{{ config.master_mix.total_nucleic_acid_ng_per_well }} ng</td></tr>
+            <tr><th>{{ reagent_name }} per vessel</th><td>{{ "%.3f"|format(config.master_mix.reagent_volume_per_well_ul) }} µL</td></tr>
+            <tr><th>Total {{ reagent_name }}</th><td>{{ "%.3f"|format(config.master_mix.reagent_volume_ul) }} µL</td></tr>
+            <tr>
+                <th>{{ culture_format_settings.buffer_name or "Buffer" }} diluent total per vessel</th>
+                <td>
+                    {% if config.master_mix.buffer_volume_per_reaction_ul is none %}
+                        <span class="status">Requires confirmation</span>
+                    {% else %}
+                        {{ "%.3f"|format(config.master_mix.buffer_volume_per_reaction_ul) }} µL
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th>Total {{ culture_format_settings.buffer_name or "buffer" }} diluent</th>
+                <td>
+                    {% if config.master_mix.buffer_volume_ul is none %}
+                        <span class="status">Requires confirmation</span>
+                    {% else %}
+                        {{ "%.3f"|format(config.master_mix.buffer_volume_ul) }} µL
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th>Total transfection mixture</th>
+                <td>
+                    {% if config.master_mix.total_mixture_volume_ul is none %}
+                        <span class="status">Requires confirmation</span>
+                    {% else %}
+                        {{ "%.3f"|format(config.master_mix.total_mixture_volume_ul) }} µL
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+        {% endfor %}
+    </section>
+
+    <section>
+        <h2>3. Experimental Procedure</h2>
+        <ol>
+            {% for step in procedure_steps %}
+            <li>
+                <strong>{{ step.action }}:</strong>
+                {% for segment in step.details %}
+                    {% if segment.bold %}
+                    <strong>{{ segment.text }}</strong>
+                    {% else %}
+                    {{ segment.text }}
+                    {% endif %}
+                {% endfor %}
+                {% if step.substeps %}
+                <ul>
+                    {% for substep in step.substeps %}
+                    <li>
+                        {% for segment in substep %}
+                            {% if segment.bold %}
+                            <strong>{{ segment.text }}</strong>
+                            {% else %}
+                            {{ segment.text }}
+                            {% endif %}
+                        {% endfor %}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ol>
+        <p><small>
+            Source: {{ procedure_source.label }} (status
+            {{ procedure_source.status }}).
+        </small></p>
+    </section>
+
+    <section>
+        <h2>4. Incubation Settings</h2>
+        <table>
+            <tr>
+                <th>Post-transfection duration</th>
+                <td>
+                    {% if incubation_time_hours is none %}
+                        {% if manufacturer_incubation_minimum_hours is not none
+                              and manufacturer_incubation_maximum_hours is not none %}
+                            {{ manufacturer_incubation_minimum_hours }}–{{ manufacturer_incubation_maximum_hours }}
+                            hours (manufacturer range; select a duration for the experiment).
+                        {% else %}
+                            Not specified; confirm the duration before use.
+                        {% endif %}
+                    {% else %}
+                        {{ "%.2f"|format(incubation_time_hours) }} hours
+                    {% endif %}
+                </td>
+            </tr>
+            <tr><th>Temperature</th><td>{{ "%.2f"|format(temperature_celsius) }} °C</td></tr>
+            <tr><th>CO₂ concentration</th><td>{{ "%.2f"|format(co2_percent) }}%</td></tr>
+        </table>
+    </section>
+
+    <section>
+        <h2>5. Final Notes and Confirmations</h2>
+        <ul>
+            {% for confirmation in procedure_confirmations %}
+            <li class="status">{{ confirmation }}</li>
+            {% endfor %}
+            {% if culture_format_settings.status == "requires_confirmation" %}
+            <li class="status">
+                Manufacturer-specific buffer and mixture values for
+                {{ culture_format_settings.label }} require confirmation.
+            </li>
+            {% endif %}
+        </ul>
+
+        <p><strong>{{ reagent_name }} ratio used:</strong>
+            {{ "%.3f"|format(reagent_ratio) }} µL/µg</p>
+        <p><strong>Preparation excess:</strong>
+            {{ "%.2f"|format(preparation_excess_percent) }}%</p>
+        <p>
+            <strong>Manufacturer format guidance:</strong>
+            {% if culture_format_settings.source_url %}
+            <a href="{{ culture_format_settings.source_url }}">
+                Open source protocol
+            </a>
+            {% elif manufacturer_protocol_source_label %}
+            {{ manufacturer_protocol_source_label }}
+            {% else %}
+            No verified source is available for this format.
+            {% endif %}
+        </p>
+    </section>
+
+    <form method="POST">
+        <input type="hidden" name="stage" value="download_docx">
+        <input type="hidden" name="technical_replicates"
+               value="{{ technical_replicates }}">
+        <input type="hidden" name="culture_format" value="{{ culture_format }}">
+        <input type="hidden" name="{{ ratio_name }}"
+               value="{{ reagent_ratio }}">
+        <input type="hidden" name="preparation_excess_percent"
+               value="{{ preparation_excess_percent }}">
+        <input type="hidden" name="temperature_celsius"
+               value="{{ temperature_celsius }}">
+        <input type="hidden" name="co2_percent" value="{{ co2_percent }}">
+        {% if incubation_time_hours is not none %}
+        <input type="hidden" name="incubation_time_hours"
+               value="{{ incubation_time_hours }}">
+        {% endif %}
+        <input type="hidden" name="protocol_name" value="{{ protocol_name }}">
+        <input type="hidden" name="experimental_date"
+               value="{{ experimental_date }}">
+        {% for strain in submitted_strains %}
+        <input type="hidden" name="strains" value="{{ strain }}">
+        {% endfor %}
+        {% for treatment in submitted_treatments %}
+        <input type="hidden" name="treatments" value="{{ treatment }}">
+        {% endfor %}
+        {% for group in experimental_groups %}
+        <input type="hidden" name="group_replicates_{{ loop.index0 }}"
+               value="{{ group.technical_replicates }}">
+        {% endfor %}
+        {% for config in treatment_configs %}
+            {% set treatment_index = loop.index0 %}
+            {% for acid in config.nucleic_acids %}
+        <input type="hidden" name="acid_name_{{ treatment_index }}"
+               value="{{ acid.name }}">
+        <input type="hidden" name="acid_amount_{{ treatment_index }}"
+               value="{{ acid.amount_per_well_ng }}">
+        <input type="hidden"
+               name="acid_concentration_{{ treatment_index }}"
+               value="{{ acid.stock_concentration_ng_per_ul }}">
+            {% endfor %}
+        {% endfor %}
+        <button type="submit" class="download-button">
+            Download Word document
+        </button>
+    </form>
+
+    <p><a href="/new-protocol">Create another protocol</a></p>
+</body>
+</html>

@@ -1,0 +1,115 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LabProtocol</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 0;
+            color: #263445;
+        }
+
+        header {
+            background-color: #243b53;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 36px;
+        }
+
+        header p {
+            margin-top: 10px;
+            color: #d9e2ec;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .section {
+            background: white;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .button {
+            display: inline-block;
+            background-color: #2878a8;
+            color: white;
+            padding: 12px 22px;
+            text-decoration: none;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+
+        .button:hover {
+            background-color: #1d5d85;
+        }
+
+        .protocol {
+            border-top: 1px solid #ddd;
+            padding: 15px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>LabProtocol</h1>
+        <p>Your personalized laboratory protocol generator</p>
+    </header>
+
+    <div class="container">
+
+        <div class="section">
+            <h2>Welcome to LabProtocol</h2>
+            <p>
+                Prepare customized laboratory protocols based on
+                your experimental design and validated laboratory methods.
+            </p>
+
+            <a href="/new-protocol" class="button">Create New Protocol</a>
+        </div>
+
+        <div class="section">
+            <h2>Available Protocols</h2>
+
+            <div class="protocol">
+                <h3>Cell Transfection – JetPRIME</h3>
+                <p>
+                    Generate a customized transfection protocol
+                    with automatic reagent calculations.
+                </p>
+                <a href="/transfection/jetprime" class="button">Select Protocol</a>
+            </div>
+
+            <div class="protocol">
+                <h3>Cell Transfection – Lipofectamine 2000</h3>
+                <p>
+                    Generate a Lipofectamine 2000 transfection protocol.
+                    Manufacturer values require confirmation.
+                </p>
+                <a href="/transfection/lipofectamine" class="button">Select Protocol</a>
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

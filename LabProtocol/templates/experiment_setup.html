@@ -1,0 +1,797 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ reagent_name }} Experiment Setup</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f4f6f9;
+            color: #263445;
+        }
+
+        input {
+            padding: 8px;
+            margin: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 8px 12px;
+            margin: 5px;
+            cursor: pointer;
+        }
+
+        .add-button {
+            background-color: #e8f0fe;
+            border: 1px solid #8ab4f8;
+            border-radius: 5px;
+        }
+
+        .remove-button {
+            background-color: #fce8e6;
+            border: 1px solid #f4aaaa;
+            border-radius: 5px;
+        }
+
+        .group-card {
+            background-color: white;
+            border: 1px solid #d5dce5;
+            border-radius: 8px;
+            padding: 18px;
+            margin: 18px 0;
+        }
+
+        .acid-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 5px;
+            margin: 10px 0;
+        }
+
+        .acid-row input {
+            min-width: 150px;
+            flex: 1;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-top: 15px;
+            width: 100%;
+            background-color: white;
+        }
+
+        th, td {
+            border: 1px solid #cccccc;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #eeeeee;
+        }
+
+        hr {
+            margin: 25px 0;
+        }
+
+        .result {
+            background-color: #eef5ee;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+
+        .error {
+            background-color: #fce8e6;
+            border: 1px solid #f4aaaa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+
+        .warning {
+            background-color: #fff4d6;
+            border: 1px solid #e6c46a;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>{{ reagent_name }} Experiment Setup</h1>
+
+    {% if error_message %}
+    <div class="error" role="alert">
+        <strong>Could not continue:</strong> {{ error_message }}
+    </div>
+    {% endif %}
+
+    {% if not setup_complete %}
+
+    <form method="POST">
+
+        <input type="hidden" name="stage" value="setup">
+
+        <h3>1. Cell Strains</h3>
+
+        <div id="strain-list">
+            {% for strain in submitted_strains or [''] %}
+            <div class="strain-row">
+                <input type="text" name="strains"
+                       placeholder="Enter strain name" value="{{ strain }}"
+                       required>
+                <button type="button" class="remove-button"
+                        onclick="this.parentElement.remove()">
+                    Remove
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+
+        <button type="button" class="add-button"
+                onclick="addStrain()">
+            + Add Strain
+        </button>
+
+        <hr>
+
+        <h3>2. Experimental Treatments</h3>
+
+        <div id="treatment-list">
+            {% for treatment in submitted_treatments or [''] %}
+            <div class="strain-row">
+                <input type="text" name="treatments"
+                       placeholder="Enter treatment name"
+                       value="{{ treatment }}" required>
+                <button type="button" class="remove-button"
+                        onclick="this.parentElement.remove()">
+                    Remove
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+
+        <button type="button" class="add-button"
+                onclick="addTreatment()">
+            + Add Treatment
+        </button>
+
+        <hr>
+
+        <h3>3. Default Wells per Experimental Group</h3>
+
+        <label for="default-group-replicates">
+            Initial number of wells for each group (you can change groups
+            individually on the next step):
+        </label>
+
+        <input id="default-group-replicates" type="number"
+               name="technical_replicates"
+               value="{{ technical_replicates }}"
+               min="1"
+               required>
+
+        <h3>4. Culture Format</h3>
+
+        <label for="culture-format">Select the culture vessel:</label>
+        <select id="culture-format" name="culture_format" required>
+            <option value="" disabled
+                    {% if not culture_format %}selected{% endif %}>
+                Select a culture format
+            </option>
+            {% for format_id, format in culture_formats.items() %}
+            <option value="{{ format_id }}"
+                    {% if culture_format == format_id %}selected{% endif %}>
+                {{ format.label }}
+                {% if format.status == "requires_confirmation" %}
+                    (manufacturer values require confirmation)
+                {% endif %}
+            </option>
+            {% endfor %}
+        </select>
+
+        <br><br>
+
+        <button type="submit" class="add-button">
+            Continue
+        </button>
+
+    </form>
+
+    {% else %}
+
+    {% if manufacturer_settings.get("reagent_name") == "Lipofectamine 2000"
+          and culture_format_settings.recommended_nucleic_acid_ug_per_reaction
+              is not none %}
+    <div class="warning" role="note">
+        <strong>Manufacturer reference for {{ culture_format_settings.label }}</strong>
+        {% set cell_counts = culture_format_settings.recommended_cells_per_vessel %}
+        <p>
+            Seed {{ "{:,}".format(cell_counts.minimum) }}–{{ "{:,}".format(cell_counts.maximum) }}
+            cells per vessel for {{ manufacturer_settings.recommended_confluency }}
+            confluency. Starting DNA amount:
+            {{ "%.0f"|format(culture_format_settings.recommended_nucleic_acid_ug_per_reaction * 1000) }}
+            ng per well. Lipofectamine 2000 range:
+            {{ culture_format_settings.reagent_volume_min_ul_per_reaction }}–{{ culture_format_settings.reagent_volume_max_ul_per_reaction }}
+            µL per well. Add
+            {{ culture_format_settings.transfection_volume_per_well_ul }} µL
+            of complex to each well.
+        </p>
+        <p>
+            Source plasmid DNA stock range:
+            {{ manufacturer_settings.plasmid_stock_concentration_min_ng_per_ul }}–{{ manufacturer_settings.plasmid_stock_concentration_max_ng_per_ul }}
+            ng/µL.
+        </p>
+        <p>
+            The source's four reagent-optimization amounts are
+            {{ culture_format_settings.optimization_reagent_volumes_ul|join(", ") }}
+            µL, each diluted in
+            {{ culture_format_settings.optimization_reagent_dilution_volume_ul }}
+            µL Opti-MEM. For the four-condition set, dilute
+            {{ culture_format_settings.optimization_dna_amount_ug }} µg DNA in
+            {{ culture_format_settings.optimization_dna_dilution_volume_ul }}
+            µL Opti-MEM, then use
+            {{ culture_format_settings.optimization_diluted_dna_per_condition_ul }}
+            µL DNA dilution per condition.
+            The standard mix supports
+            {{ culture_format_settings.optimization_wells_per_condition }}
+            well(s) per condition; calculated mixes below scale to your entered
+            well count and preparation excess.
+        </p>
+        <p><small>Source: {{ manufacturer_protocol_source_label }}. The source lists no values for other vessel formats.</small></p>
+    </div>
+    {% elif manufacturer_settings.get("reagent_name") == "Lipofectamine 2000"
+          and culture_format_settings %}
+    <div class="warning" role="note">
+        The attached manufacturer protocol does not specify setup amounts for
+        {{ culture_format_settings.label }}. Confirm cell seeding, DNA, reagent,
+        and Opti-MEM values before preparing a transfection.
+        <p><small>Source checked: {{ manufacturer_protocol_source_label }}.</small></p>
+    </div>
+    {% endif %}
+
+    <h2>5. Experimental Groups</h2>
+
+    <table>
+        <tr>
+            <th>Strain</th>
+            <th>Treatment</th>
+            <th>Wells in this group</th>
+        </tr>
+
+        {% for group in experimental_groups %}
+        <tr>
+            <td>{{ group.strain }}</td>
+            <td>{{ group.treatment }}</td>
+            <td>
+                {% if not calculations_complete %}
+                <input type="number" min="1" step="1"
+                       name="group_replicates_{{ loop.index0 }}"
+                       value="{{ group_replicate_values[loop.index0] }}"
+                       form="nucleic-acid-form"
+                       aria-label="Wells for {{ group.strain }} - {{ group.treatment }}"
+                       required>
+                {% else %}
+                {{ group.technical_replicates }}
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    {% if not calculations_complete %}
+
+    <hr>
+
+    <h2>6. Nucleic Acid Setup</h2>
+
+    <p>
+        Define the nucleic acids for each treatment. Each treatment
+        composition is shared by all strains receiving it.
+    </p>
+
+    <form id="nucleic-acid-form" method="POST">
+
+        <input type="hidden" name="stage"
+               value="save_nucleic_acids">
+
+        <input type="hidden" name="technical_replicates"
+               value="{{ technical_replicates }}">
+
+        <input type="hidden" name="culture_format"
+               value="{{ culture_format }}">
+
+        {% for strain in submitted_strains %}
+        <input type="hidden" name="strains" value="{{ strain }}">
+        {% endfor %}
+
+        {% for treatment in submitted_treatments %}
+        <input type="hidden" name="treatments" value="{{ treatment }}">
+        {% endfor %}
+
+        <p>Each treatment mix is calculated for the sum of wells in its groups.</p>
+
+        <h3>Calculation Settings</h3>
+
+        <label>{{ reagent_name }} ratio (µL per µg nucleic acid):</label>
+
+        <input type="number" step="any" min="0.01"
+               name="{{ ratio_name }}"
+               value="{{ reagent_ratio }}"
+               required>
+
+        {% if manufacturer_settings.reagent_ratio_min_ul_per_ug is defined %}
+        <p>
+            Source-guided starting range:
+            {{ manufacturer_settings.reagent_ratio_min_ul_per_ug }}–{{ manufacturer_settings.reagent_ratio_max_ul_per_ug }}
+            µL per µg DNA. Optimize the reagent amount for the cell type.
+        </p>
+        {% endif %}
+
+        <br>
+
+        <label>Preparation excess (%):</label>
+
+        <input type="number" step="any" min="0"
+               name="preparation_excess_percent"
+               value="{{ preparation_excess_percent }}"
+               required>
+
+        <br>
+
+        <label>Target total nucleic acid per well (ng):</label>
+
+        <input type="number" step="any" min="0"
+               name="target_total_acid_ng"
+               value="{{ target_total_acid_ng if target_total_acid_ng is not none else '' }}">
+
+        <br>
+
+        <label>Empty-vector stock concentration (ng/µL):</label>
+
+        <input type="number" step="any" min="0.01"
+               name="empty_vector_concentration"
+               value="{{ empty_vector_concentration if empty_vector_concentration is not none else '' }}">
+
+        <h3>Incubation Settings</h3>
+
+        <p>
+            {% if manufacturer_incubation_minimum_hours is not none
+                  and manufacturer_incubation_maximum_hours is not none %}
+                The manufacturer recommends analysis after
+                {{ manufacturer_incubation_minimum_hours }}–{{ manufacturer_incubation_maximum_hours }}
+                hours. You may enter a lab-selected duration.
+            {% else %}
+                The manufacturer does not specify a post-transfection duration.
+                Enter a lab-selected duration or leave it blank until confirmed.
+            {% endif %}
+        </p>
+
+        <label for="incubation-time">Post-transfection incubation (hours):</label>
+        <input id="incubation-time" type="number" step="any" min="0.01"
+               name="incubation_time_hours"
+               value="{{ incubation_time_hours if incubation_time_hours is not none else '' }}">
+
+        <br>
+
+        <label for="temperature-celsius">Incubation temperature (°C):</label>
+        <input id="temperature-celsius" type="number" step="any" min="0.01"
+               name="temperature_celsius"
+               value="{{ temperature_celsius }}" required>
+
+        <br>
+
+        <label for="co2-percent">CO₂ concentration (%):</label>
+        <input id="co2-percent" type="number" step="any" min="0" max="100"
+               name="co2_percent"
+               value="{{ co2_percent }}" required>
+
+        <h3>Protocol Details</h3>
+
+        <label for="protocol-name">Protocol name:</label>
+        <input id="protocol-name" type="text" name="protocol_name"
+               value="{{ protocol_name }}" required>
+
+        <br>
+
+        <label for="experimental-date">Experimental date (optional):</label>
+        <input id="experimental-date" type="date" name="experimental_date"
+               value="{{ experimental_date }}">
+
+        {% for config in treatment_configs %}
+
+        <div class="group-card">
+
+            <h3>Treatment: {{ config.treatment }}</h3>
+
+            <p>
+                Applied to: {{ submitted_strains|join(", ") }}
+            </p>
+
+            <p>
+                Number of wells:
+                {{ config.number_of_wells }}
+            </p>
+
+            {% set treatment_index = loop.index0 %}
+            <div id="acid-list-{{ treatment_index }}">
+
+                {% for acid in config.nucleic_acids %}
+                <div class="acid-row">
+
+                    <input type="text"
+                           name="acid_name_{{ treatment_index }}"
+                           placeholder="Nucleic acid name"
+                           value="{{ acid.name }}">
+
+                    <input type="number" step="any" min="0"
+                           name="acid_amount_{{ treatment_index }}"
+                           placeholder="Amount per well (ng)"
+                           value="{{ acid.amount_per_well_ng }}">
+
+                    <input type="number" step="any" min="0.0000001"
+                           name="acid_concentration_{{ treatment_index }}"
+                           placeholder="Stock concentration (ng/µL){% if manufacturer_settings.get('reagent_name') == 'Lipofectamine 2000' %}; plasmid source range 500–5000{% endif %}"
+                           value="{{ acid.stock_concentration_ng_per_ul }}">
+
+                </div>
+                {% endfor %}
+
+            </div>
+
+            <button type="button"
+                    class="add-button"
+                    onclick="addNucleicAcid({{ loop.index0 }})">
+                + Add Nucleic Acid
+            </button>
+
+        </div>
+
+        {% endfor %}
+
+        <button type="submit" class="add-button">
+            Calculate Master Mixes
+        </button>
+
+    </form>
+
+    {% else %}
+
+    <hr>
+
+    <h2>7. Master Mix Calculations</h2>
+
+    <p><strong>{{ reagent_name }} ratio:</strong>
+        {{ reagent_ratio }} µL/µg</p>
+
+    <p><strong>Preparation excess:</strong>
+        {{ preparation_excess_percent }}%</p>
+
+    {% if target_total_acid_ng is not none %}
+    <p><strong>Target total nucleic acid per well:</strong>
+        {{ target_total_acid_ng }} ng</p>
+    {% endif %}
+
+    {% if empty_vector_concentration is not none %}
+    <p><strong>Empty-vector stock concentration:</strong>
+        {{ empty_vector_concentration }} ng/µL</p>
+    {% endif %}
+
+    <h3>Incubation Settings</h3>
+
+    <p><strong>Post-transfection incubation:</strong>
+        {% if incubation_time_hours is none %}
+            {% if manufacturer_incubation_minimum_hours is not none
+                  and manufacturer_incubation_maximum_hours is not none %}
+                {{ manufacturer_incubation_minimum_hours }}–{{ manufacturer_incubation_maximum_hours }}
+                hours (manufacturer range; select a duration for the experiment).
+            {% else %}
+                Not specified; confirm the duration before use.
+            {% endif %}
+        {% else %}
+            {{ "%.2f"|format(incubation_time_hours) }} hours
+        {% endif %}
+    </p>
+
+    <p><strong>Temperature:</strong>
+        {{ "%.2f"|format(temperature_celsius) }} °C</p>
+
+    <p><strong>CO₂ concentration:</strong>
+        {{ "%.2f"|format(co2_percent) }}%</p>
+
+    <p>
+        <strong>Manufacturer reference per culture vessel:</strong>
+        {% if manufacturer_settings.get("reagent_name") == "Lipofectamine 2000"
+              and culture_format_settings.recommended_nucleic_acid_ug_per_reaction
+                  is not none %}
+            {{ "%.0f"|format(culture_format_settings.recommended_nucleic_acid_ug_per_reaction * 1000) }}
+            ng DNA;
+            {{ culture_format_settings.reagent_volume_min_ul_per_reaction }}–{{ culture_format_settings.reagent_volume_max_ul_per_reaction }}
+            µL {{ reagent_name }};
+            {{ culture_format_settings.transfection_volume_per_well_ul }}
+            µL complex added per well.
+            <br>
+            Source optimization amounts:
+            {{ culture_format_settings.optimization_reagent_volumes_ul|join(", ") }}
+            µL {{ reagent_name }} per condition.
+        {% elif culture_format_settings.recommended_nucleic_acid_ug_per_reaction
+                is not none %}
+            {{ culture_format_settings.recommended_nucleic_acid_ug_per_reaction }}
+            µg nucleic acid.
+            {% if culture_format_settings.jetprime_volume_min_ul_per_reaction
+                  is not none %}
+                JetPRIME:
+                {{ culture_format_settings.jetprime_volume_min_ul_per_reaction }}–{{ culture_format_settings.jetprime_volume_max_ul_per_reaction }}
+                µL per reaction.
+            {% endif %}
+        {% else %}
+            Requires confirmation
+        {% endif %}
+        {% if culture_format_settings.source_url %}
+        (<a href="{{ culture_format_settings.source_url }}" target="_blank"
+            rel="noopener noreferrer">manufacturer source</a>)
+        {% elif manufacturer_protocol_source_label %}
+        ({{ manufacturer_protocol_source_label }})
+        {% endif %}
+    </p>
+
+    {% for config in treatment_configs %}
+
+    <div class="group-card">
+
+        <h3>Treatment: {{ config.treatment }}</h3>
+
+        <p><strong>Strains receiving treatment:</strong>
+            {{ submitted_strains|join(", ") }}</p>
+
+        <p><strong>Number of wells:</strong>
+            {{ config.number_of_wells }}</p>
+
+        <p><strong>Reaction-equivalents to prepare:</strong>
+            {{ config.master_mix.preparation_wells }}</p>
+
+        <p><strong>Total nucleic acid per well:</strong>
+            {{ config.master_mix.total_nucleic_acid_ng_per_well }} ng
+        </p>
+
+        <h4>Nucleic Acid Volumes</h4>
+
+        <table>
+            <tr>
+                <th>Nucleic acid</th>
+                <th>Amount per well (ng)</th>
+                <th>Stock concentration (ng/µL)</th>
+                <th>Volume per well (µL)</th>
+                <th>Total volume (µL)</th>
+            </tr>
+
+            {% for acid in config.master_mix.nucleic_acids %}
+            <tr>
+                <td>{{ acid.name }}</td>
+                <td>{{ "%.3f"|format(acid.amount_per_well_ng) }}</td>
+                <td>
+                    {{ "%.3f"|format(acid.stock_concentration_ng_per_ul) }}
+                </td>
+                <td>{{ "%.3f"|format(acid.volume_per_well_ul) }}</td>
+                <td>{{ "%.3f"|format(acid.total_volume_ul) }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <div class="result">
+
+            <p>
+                <strong>Total nucleic acid per well:</strong>
+                {{ config.master_mix.total_nucleic_acid_ng_per_well }} ng
+            </p>
+
+            <p>
+                <strong>{{ reagent_name }} per well:</strong>
+                {{ "%.3f"|format(
+                    config.master_mix.reagent_volume_per_well_ul
+                ) }} µL
+            </p>
+
+            <p>
+                <strong>Total {{ reagent_name }}:</strong>
+                {{ "%.3f"|format(config.master_mix.reagent_volume_ul) }}
+                µL
+            </p>
+
+            <p>
+                <strong>{% if culture_format_settings.buffer_name %}{{ culture_format_settings.buffer_name }} diluent total per well{% else %}Manufacturer buffer per reaction{% endif %}:</strong>
+                {% if config.master_mix.buffer_volume_per_reaction_ul is none %}
+                    Requires confirmation
+                {% else %}
+                    {{ "%.3f"|format(
+                        config.master_mix.buffer_volume_per_reaction_ul
+                    ) }} µL
+                {% endif %}
+            </p>
+
+            <p>
+                <strong>Total buffer for master mix:</strong>
+                {% if config.master_mix.buffer_volume_ul is none %}
+                    Requires confirmation
+                {% else %}
+                    {{ "%.3f"|format(
+                        config.master_mix.buffer_volume_ul
+                    ) }} µL
+                {% endif %}
+            </p>
+
+            <p>
+                <strong>Transfection mixture per reaction:</strong>
+                {% if config.master_mix.transfection_mixture_volume_per_reaction_ul
+                      is none %}
+                    Requires confirmation
+                {% else %}
+                    {{ "%.3f"|format(
+                        config.master_mix.transfection_mixture_volume_per_reaction_ul
+                    ) }} µL
+                {% endif %}
+            </p>
+
+            <p>
+                <strong>Total transfection mixture to prepare:</strong>
+                {% if config.master_mix.total_mixture_volume_ul is none %}
+                    Requires confirmation
+                {% else %}
+                    {{ "%.3f"|format(
+                        config.master_mix.total_mixture_volume_ul
+                    ) }} µL
+                {% endif %}
+            </p>
+
+        </div>
+
+    </div>
+
+    {% endfor %}
+
+    <hr>
+
+    <h3>Generate Customized Protocol</h3>
+
+    <form method="POST">
+        <input type="hidden" name="stage" value="generate_protocol">
+        <input type="hidden" name="technical_replicates"
+               value="{{ technical_replicates }}">
+        <input type="hidden" name="culture_format" value="{{ culture_format }}">
+        <input type="hidden" name="{{ ratio_name }}"
+               value="{{ reagent_ratio }}">
+        <input type="hidden" name="preparation_excess_percent"
+               value="{{ preparation_excess_percent }}">
+        {% if target_total_acid_ng is not none %}
+        <input type="hidden" name="target_total_acid_ng"
+               value="{{ target_total_acid_ng }}">
+        {% endif %}
+        {% if empty_vector_concentration is not none %}
+        <input type="hidden" name="empty_vector_concentration"
+               value="{{ empty_vector_concentration }}">
+        {% endif %}
+        <input type="hidden" name="temperature_celsius"
+               value="{{ temperature_celsius }}">
+        <input type="hidden" name="co2_percent" value="{{ co2_percent }}">
+        {% if incubation_time_hours is not none %}
+        <input type="hidden" name="incubation_time_hours"
+               value="{{ incubation_time_hours }}">
+        {% endif %}
+        <input type="hidden" name="protocol_name" value="{{ protocol_name }}">
+        <input type="hidden" name="experimental_date"
+               value="{{ experimental_date }}">
+
+        {% for strain in submitted_strains %}
+        <input type="hidden" name="strains" value="{{ strain }}">
+        {% endfor %}
+        {% for treatment in submitted_treatments %}
+        <input type="hidden" name="treatments" value="{{ treatment }}">
+        {% endfor %}
+        {% for group in experimental_groups %}
+        <input type="hidden" name="group_replicates_{{ loop.index0 }}"
+               value="{{ group.technical_replicates }}">
+        {% endfor %}
+        {% for config in treatment_configs %}
+            {% set treatment_index = loop.index0 %}
+            {% for acid in config.nucleic_acids %}
+        <input type="hidden" name="acid_name_{{ treatment_index }}"
+               value="{{ acid.name }}">
+        <input type="hidden" name="acid_amount_{{ treatment_index }}"
+               value="{{ acid.amount_per_well_ng }}">
+        <input type="hidden"
+               name="acid_concentration_{{ treatment_index }}"
+               value="{{ acid.stock_concentration_ng_per_ul }}">
+            {% endfor %}
+        {% endfor %}
+
+        <button type="submit" class="add-button">
+            Generate Customized Protocol
+        </button>
+    </form>
+
+    {% endif %}
+
+    {% endif %}
+
+
+    <script>
+
+        function addStrain() {
+            const list = document.getElementById("strain-list");
+            const row = document.createElement("div");
+            row.className = "strain-row";
+
+            row.innerHTML = `
+                <input type="text" name="strains"
+                       placeholder="Enter strain name" required>
+                <button type="button" class="remove-button"
+                        onclick="this.parentElement.remove()">
+                    Remove
+                </button>
+            `;
+
+            list.appendChild(row);
+        }
+
+
+        function addTreatment() {
+            const list = document.getElementById("treatment-list");
+            const row = document.createElement("div");
+            row.className = "strain-row";
+
+            row.innerHTML = `
+                <input type="text" name="treatments"
+                       placeholder="Enter treatment name" required>
+                <button type="button" class="remove-button"
+                        onclick="this.parentElement.remove()">
+                    Remove
+                </button>
+            `;
+
+            list.appendChild(row);
+        }
+
+
+        function addNucleicAcid(treatmentIndex) {
+            const list = document.getElementById(
+                "acid-list-" + treatmentIndex
+            );
+
+            const row = document.createElement("div");
+            row.className = "acid-row";
+
+            row.innerHTML = `
+                <input type="text"
+                       name="acid_name_${treatmentIndex}"
+                       placeholder="Nucleic acid name">
+
+                <input type="number" step="any" min="0"
+                       name="acid_amount_${treatmentIndex}"
+                       placeholder="Amount per well (ng)">
+
+                <input type="number" step="any" min="0.0000001"
+                       name="acid_concentration_${treatmentIndex}"
+                       placeholder="Stock concentration (ng/µL)">
+
+                <button type="button" class="remove-button"
+                        onclick="this.parentElement.remove()">
+                    Remove
+                </button>
+            `;
+
+            list.appendChild(row);
+        }
+
+    </script>
+
+</body>
+</html>

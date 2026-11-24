@@ -1,0 +1,181 @@
+{
+  "module_id": "lipofectamine_2000_transfection",
+  "module_version": 1,
+  "protocol_name": "Cell Transfection - Lipofectamine 2000",
+  "defaults": {
+    "technical_replicates": 1,
+    "reagent_ratio": 2,
+    "jetprime_ratio": 2,
+    "preparation_excess_percent": 10,
+    "incubation_time_hours": null,
+    "temperature_celsius": 37,
+    "co2_percent": 5
+  },
+  "manufacturer_settings": {
+    "reagent_name": "Lipofectamine 2000",
+    "recommended_confluency": "70–90%",
+    "recommended_temperature_celsius": 37,
+    "recommended_incubation_time_hours": null,
+    "reagent_ratio_min_ul_per_ug": 2,
+    "reagent_ratio_max_ul_per_ug": 5,
+    "plasmid_stock_concentration_min_ng_per_ul": 500,
+    "plasmid_stock_concentration_max_ng_per_ul": 5000,
+    "culture_formats": {
+      "96_well_plate": {
+        "label": "96-well plate",
+        "count_unit": "plates",
+        "vessels_per_unit": 96,
+        "layout": {
+          "rows": 8,
+          "columns": 12,
+          "container_label": "Plate",
+          "position_prefix": "A"
+        },
+        "buffer_volume_per_reaction_ul": 16.6666666667,
+        "buffer_name": "Opti-MEM",
+        "recommended_nucleic_acid_ug_per_reaction": 0.1,
+        "recommended_cells_per_vessel": {
+          "minimum": 10000,
+          "maximum": 40000
+        },
+        "reagent_volume_min_ul_per_reaction": 0.2,
+        "reagent_volume_max_ul_per_reaction": 0.5,
+        "transfection_volume_per_well_ul": 10,
+        "optimization_wells_per_condition": 3,
+        "optimization_reagent_volumes_ul": [1, 1.5, 2, 2.5],
+        "optimization_reagent_dilution_volume_ul": 25,
+        "optimization_dna_dilution_volume_ul": 125,
+        "optimization_dna_amount_ug": 2.5,
+        "optimization_diluted_dna_per_condition_ul": 25,
+        "status": "verified",
+        "source_url": null
+      },
+      "24_well_plate": {
+        "label": "24-well plate",
+        "count_unit": "plates",
+        "vessels_per_unit": 24,
+        "layout": {
+          "rows": 4,
+          "columns": 6,
+          "container_label": "Plate",
+          "position_prefix": "A"
+        },
+        "buffer_volume_per_reaction_ul": 50,
+        "buffer_name": "Opti-MEM",
+        "recommended_nucleic_acid_ug_per_reaction": 0.5,
+        "recommended_cells_per_vessel": {
+          "minimum": 50000,
+          "maximum": 200000
+        },
+        "reagent_volume_min_ul_per_reaction": 1,
+        "reagent_volume_max_ul_per_reaction": 2.5,
+        "transfection_volume_per_well_ul": 50,
+        "optimization_wells_per_condition": 2,
+        "optimization_reagent_volumes_ul": [2, 3, 4, 5],
+        "optimization_reagent_dilution_volume_ul": 50,
+        "optimization_dna_dilution_volume_ul": 250,
+        "optimization_dna_amount_ug": 5,
+        "optimization_diluted_dna_per_condition_ul": 50,
+        "status": "verified",
+        "source_url": null
+      },
+      "12_well_plate": {
+        "label": "12-well plate",
+        "count_unit": "plates",
+        "vessels_per_unit": 12,
+        "layout": {
+          "rows": 3,
+          "columns": 4,
+          "container_label": "Plate",
+          "position_prefix": "A"
+        },
+        "buffer_volume_per_reaction_ul": null,
+        "recommended_nucleic_acid_ug_per_reaction": null,
+        "status": "requires_confirmation",
+        "source_url": null
+      },
+      "6_well_plate": {
+        "label": "6-well plate",
+        "count_unit": "plates",
+        "vessels_per_unit": 6,
+        "layout": {
+          "rows": 2,
+          "columns": 3,
+          "container_label": "Plate",
+          "position_prefix": "A"
+        },
+        "buffer_volume_per_reaction_ul": 300,
+        "buffer_name": "Opti-MEM",
+        "recommended_nucleic_acid_ug_per_reaction": 2.5,
+        "recommended_cells_per_vessel": {
+          "minimum": 250000,
+          "maximum": 1000000
+        },
+        "reagent_volume_min_ul_per_reaction": 5,
+        "reagent_volume_max_ul_per_reaction": 12.5,
+        "transfection_volume_per_well_ul": 250,
+        "optimization_wells_per_condition": 1,
+        "optimization_reagent_volumes_ul": [6, 9, 12, 15],
+        "optimization_reagent_dilution_volume_ul": 150,
+        "optimization_dna_dilution_volume_ul": 700,
+        "optimization_dna_amount_ug": 14,
+        "optimization_diluted_dna_per_condition_ul": 150,
+        "status": "verified",
+        "source_url": null
+      },
+      "60_mm_dish": {
+        "label": "60 mm dish",
+        "count_unit": "dishes",
+        "vessels_per_unit": 1,
+        "layout": {
+          "rows": 1,
+          "columns": 1,
+          "container_label": "Dish",
+          "position_prefix": "Dish"
+        },
+        "buffer_volume_per_reaction_ul": null,
+        "recommended_nucleic_acid_ug_per_reaction": null,
+        "status": "requires_confirmation",
+        "source_url": null
+      }
+    },
+    "manufacturer_protocol": {
+      "source_label": "Thermo Fisher Scientific, Lipofectamine 2000 Reagent Protocol, Pub. No. MAN0007824, Rev. 1.0 (2013)",
+      "source_status": "Values transcribed from the user-provided protocol",
+      "source_url": null,
+      "cell_seeding": {
+        "96_well_plate": {
+          "minimum_cells_per_vessel": 10000,
+          "maximum_cells_per_vessel": 40000,
+          "medium_volume_ml_per_vessel": null
+        },
+        "24_well_plate": {
+          "minimum_cells_per_vessel": 50000,
+          "maximum_cells_per_vessel": 200000,
+          "medium_volume_ml_per_vessel": null
+        },
+        "6_well_plate": {
+          "minimum_cells_per_vessel": 250000,
+          "maximum_cells_per_vessel": 1000000,
+          "medium_volume_ml_per_vessel": null
+        }
+      },
+      "dna_transfection": {
+        "serum_during_transfection": "optional",
+        "buffer_name": "Opti-MEM",
+        "dna_dilution_vortex_seconds": null,
+        "complex_vortex_seconds": null,
+        "complex_incubation_minutes": 5,
+        "complex_incubation_temperature": "room temperature",
+        "cell_incubation_minimum_hours": 24,
+        "cell_incubation_maximum_hours": 72,
+        "medium_change_required": false
+      }
+    }
+  },
+  "manufacturer_verified_procedure": [],
+  "manufacturer_procedure_confirmations": [
+    "Lipofectamine 2000 amounts are cell-type dependent; optimize the reagent amount using the four source-listed conditions before adopting a routine setting.",
+    "Confirm the 2013 protocol guidance against current manufacturer instructions before use."
+  ]
+}
