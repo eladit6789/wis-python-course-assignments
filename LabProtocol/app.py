@@ -7,6 +7,8 @@ from pathlib import Path
 from flask import Flask, render_template, request, send_file
 from werkzeug.utils import secure_filename
 
+from hbs_calculations import calculate_hbs_master_mix
+from hbs_procedure import build_hbs_procedure
 from jetprime_procedure import build_jetprime_procedure
 from protocol_document import create_protocol_document
 from jetprime_calculations import (
@@ -19,7 +21,8 @@ app = Flask(__name__)
 
 METHOD_TEMPLATE_FILES = {
     "jetprime": "jetprime_template.json",
-    "lipofectamine": "lipofectamine_template.json"
+    "lipofectamine": "lipofectamine_template.json",
+    "hbs": "hbs_template.json"
 }
 
 
@@ -265,6 +268,19 @@ def _empty_nucleic_acid_row():
     }
 
 
+def _initial_nucleic_acid_rows(method_id, treatment):
+    if method_id != "hbs":
+        return [_empty_nucleic_acid_row()]
+    return [
+        {"name": "Firefly (control)", "amount_per_well_ng": 50,
+         "stock_concentration_ng_per_ul": 50},
+        {"name": f"Renilla ({treatment})", "amount_per_well_ng": 30,
+         "stock_concentration_ng_per_ul": ""},
+        {"name": "GFP", "amount_per_well_ng": 10,
+         "stock_concentration_ng_per_ul": 25}
+    ]
+
+
 def _culture_unit_count_label(count, culture_format_settings):
     unit = culture_format_settings["count_unit"]
     if count == 1:
@@ -350,8 +366,8 @@ def transfection(method_id):
     calculations_complete = False
     jetprime_ratio = default_ratio
     preparation_excess_percent = DEFAULTS["preparation_excess_percent"]
-    target_total_acid_ng = None
-    empty_vector_concentration = None
+    target_total_acid_ng = 1000 if method_id == "hbs" else None
+    empty_vector_concentration = 500 if method_id == "hbs" else None
     incubation_time_hours = DEFAULTS["incubation_time_hours"]
     temperature_celsius = DEFAULTS["temperature_celsius"]
     co2_percent = DEFAULTS["co2_percent"]
@@ -446,7 +462,9 @@ def transfection(method_id):
                             for group in experimental_groups
                             if group["treatment"] == treatment
                         ),
-                        "nucleic_acids": [_empty_nucleic_acid_row()]
+                        "nucleic_acids": _initial_nucleic_acid_rows(
+                            method_id, treatment
+                        )
                     }
                     for treatment in submitted_treatments
                 ]
@@ -497,12 +515,13 @@ def transfection(method_id):
                     ) = _read_protocol_metadata(
                         PROTOCOL_TEMPLATE["protocol_name"]
                     )
-                    jetprime_ratio = _read_calculation_setting(
-                        ratio_name,
-                        f"{reagent_name} ratio",
-                        default_ratio,
-                        False
-                    )
+                    if method_id != "hbs":
+                        jetprime_ratio = _read_calculation_setting(
+                            ratio_name,
+                            f"{reagent_name} ratio",
+                            default_ratio,
+                            False
+                        )
                     preparation_excess_percent = _read_calculation_setting(
                         "preparation_excess_percent",
                         "Preparation excess",
@@ -535,21 +554,28 @@ def transfection(method_id):
                         nucleic_acids = _read_treatment_nucleic_acids(
                             treatment_index, treatment
                         )
-                        master_mix = calculate_group_master_mix(
-                            nucleic_acids=nucleic_acids,
-                            number_of_wells=treatment_wells,
-                            jetprime_ratio=jetprime_ratio,
-                            excess_percent=preparation_excess_percent,
-                            buffer_per_reaction_ul=(
-                                culture_format_settings[
-                                    "buffer_volume_per_reaction_ul"
-                                ]
-                            ),
-                            target_total_acid_ng=target_total_acid_ng,
-                            empty_vector_concentration=(
+                        if method_id == "hbs":
+                            master_mix = calculate_hbs_master_mix(
+                                nucleic_acids, treatment_wells,
+                                preparation_excess_percent, target_total_acid_ng,
                                 empty_vector_concentration
                             )
-                        )
+                        else:
+                            master_mix = calculate_group_master_mix(
+                                nucleic_acids=nucleic_acids,
+                                number_of_wells=treatment_wells,
+                                jetprime_ratio=jetprime_ratio,
+                                excess_percent=preparation_excess_percent,
+                                buffer_per_reaction_ul=(
+                                    culture_format_settings[
+                                        "buffer_volume_per_reaction_ul"
+                                    ]
+                                ),
+                                target_total_acid_ng=target_total_acid_ng,
+                                empty_vector_concentration=(
+                                    empty_vector_concentration
+                                )
+                            )
                         treatment_configs.append({
                             "treatment": treatment,
                             "nucleic_acids": nucleic_acids,
@@ -680,8 +706,10 @@ def transfection(method_id):
             container_label=layout_settings["container_label"],
             position_prefix=layout_settings.get("position_prefix")
         )
-        protocol_context["procedure_steps"] = build_jetprime_procedure(
-            protocol_context, manufacturer_settings
+        protocol_context["procedure_steps"] = (
+            build_hbs_procedure(protocol_context)
+            if method_id == "hbs"
+            else build_jetprime_procedure(protocol_context, manufacturer_settings)
         )
         protocol_context["procedure_source"] = {
             "label": manufacturer_protocol["source_label"],

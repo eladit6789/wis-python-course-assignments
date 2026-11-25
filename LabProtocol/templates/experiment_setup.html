@@ -209,6 +209,15 @@
 
     {% else %}
 
+    {% if method_id == "hbs" %}
+    <div class="warning" role="note">
+        This 24-well recipe is based on the supplied laboratory example, not
+        a manufacturer protocol. Confirm ambiguous timing and assay details
+        before use. Verify all example
+        plasmid amounts and stock concentrations for your experiment.
+    </div>
+    {% endif %}
+
     {% if manufacturer_settings.get("reagent_name") == "Lipofectamine 2000"
           and culture_format_settings.recommended_nucleic_acid_ug_per_reaction
               is not none %}
@@ -322,6 +331,7 @@
 
         <h3>Calculation Settings</h3>
 
+        {% if method_id != "hbs" %}
         <label>{{ reagent_name }} ratio (µL per µg nucleic acid):</label>
 
         <input type="number" step="any" min="0.01"
@@ -338,6 +348,14 @@
         {% endif %}
 
         <br>
+        {% else %}
+        <p>Per well: DNA and 5 µL 2.5 M CaCl2 are brought to 50 µL with DDW,
+           then mixed with 50 µL 2x HBS. Enter the actual reporter stock
+           concentration; pGEM tops up to the target DNA amount.</p>
+        <p>Plasmid rows are added in the order shown, after DDW and automatic
+           pGEM top-up and before CaCl2. Edit or remove rows and add new ones
+           to set the desired order.</p>
+        {% endif %}
 
         <label>Preparation excess (%):</label>
 
@@ -370,6 +388,10 @@
                 The manufacturer recommends analysis after
                 {{ manufacturer_incubation_minimum_hours }}–{{ manufacturer_incubation_maximum_hours }}
                 hours. You may enter a lab-selected duration.
+            {% elif method_id == "hbs" %}
+                Wait 24 hours after transfection before harvesting by default.
+                Temperature and CO₂ were not specified in the example; confirm
+                those settings locally.
             {% else %}
                 The manufacturer does not specify a post-transfection duration.
                 Enter a lab-selected duration or leave it blank until confirmed.
@@ -443,6 +465,10 @@
                            placeholder="Stock concentration (ng/µL){% if manufacturer_settings.get('reagent_name') == 'Lipofectamine 2000' %}; plasmid source range 500–5000{% endif %}"
                            value="{{ acid.stock_concentration_ng_per_ul }}">
 
+                    {% if method_id == "hbs" %}
+                    <button type="button" class="remove-button"
+                            onclick="this.parentElement.remove()">Remove</button>
+                    {% endif %}
                 </div>
                 {% endfor %}
 
@@ -470,8 +496,10 @@
 
     <h2>7. Master Mix Calculations</h2>
 
+    {% if method_id != "hbs" %}
     <p><strong>{{ reagent_name }} ratio:</strong>
         {{ reagent_ratio }} µL/µg</p>
+    {% endif %}
 
     <p><strong>Preparation excess:</strong>
         {{ preparation_excess_percent }}%</p>
@@ -508,6 +536,7 @@
     <p><strong>CO₂ concentration:</strong>
         {{ "%.2f"|format(co2_percent) }}%</p>
 
+    {% if method_id != "hbs" %}
     <p>
         <strong>Manufacturer reference per culture vessel:</strong>
         {% if manufacturer_settings.get("reagent_name") == "Lipofectamine 2000"
@@ -543,6 +572,7 @@
         ({{ manufacturer_protocol_source_label }})
         {% endif %}
     </p>
+    {% endif %}
 
     {% for config in treatment_configs %}
 
@@ -594,6 +624,14 @@
                 {{ config.master_mix.total_nucleic_acid_ng_per_well }} ng
             </p>
 
+            {% if method_id == "hbs" %}
+            <p><strong>DDW:</strong> {{ "%.3f"|format(config.master_mix.water_per_well_ul) }} µL per well;
+                {{ "%.3f"|format(config.master_mix.water_total_ul) }} µL total.</p>
+            <p><strong>2.5 M CaCl2:</strong> {{ "%.3f"|format(config.master_mix.cacl2_per_well_ul) }} µL per well;
+                {{ "%.3f"|format(config.master_mix.cacl2_total_ul) }} µL total.</p>
+            <p><strong>2x HBS:</strong> {{ "%.3f"|format(config.master_mix.hbs_per_well_ul) }} µL per well;
+                {{ "%.3f"|format(config.master_mix.hbs_total_ul) }} µL total.</p>
+            {% else %}
             <p>
                 <strong>{{ reagent_name }} per well:</strong>
                 {{ "%.3f"|format(
@@ -629,6 +667,7 @@
                 {% endif %}
             </p>
 
+            {% endif %}
             <p>
                 <strong>Transfection mixture per reaction:</strong>
                 {% if config.master_mix.transfection_mixture_volume_per_reaction_ul

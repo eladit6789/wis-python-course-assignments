@@ -1,0 +1,37 @@
+{
+  "protocol_name": "Cell Transfection - HBS",
+  "defaults": {
+    "technical_replicates": 1,
+    "preparation_excess_percent": 0,
+    "incubation_time_hours": 24,
+    "temperature_celsius": 37,
+    "co2_percent": 5
+  },
+  "manufacturer_settings": {
+    "reagent_name": "HBS / CaCl2",
+    "manufacturer_protocol": {
+      "source_label": "User-supplied 24-well laboratory example",
+      "source_status": "requires laboratory confirmation",
+      "dna_transfection": {
+        "cell_incubation_minimum_hours": null,
+        "cell_incubation_maximum_hours": null
+      }
+    },
+    "culture_formats": {
+      "24_well_plate": {
+        "label": "24-well plate",
+        "count_unit": "plates",
+        "vessels_per_unit": 24,
+        "layout": {"rows": 4, "columns": 6, "container_label": "Plate"},
+        "status": "example",
+        "source_url": null
+      }
+    }
+  },
+  "manufacturer_verified_procedure": [],
+  "manufacturer_procedure_confirmations": [
+    "Use the specified 2.5 M CaCl2 stock and verify all plasmid concentrations.",
+    "Confirm the timing, the instruction to put cells on the walls, and assay reagent amounts before use.",
+    "Temperature and CO2 defaults are user-adjustable assumptions, not specified by the example."
+  ]
+}

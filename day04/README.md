@@ -13,6 +13,16 @@ python -m pip install -r day04/requirements.txt
 python day04/app.py
 ```
 
+On Windows, if `python` opens the Microsoft Store or is not recognized, use the path to your installed Python interpreter for both commands. For a standard Anaconda installation in your user folder, run these in PowerShell from the repository root:
+
+```powershell
+$python = "$env:USERPROFILE\anaconda3\python.exe"
+& $python -m pip install -r day04\requirements.txt
+& $python day04\app.py
+```
+
+Use the same interpreter for installing dependencies and starting the app. If Anaconda is installed elsewhere, replace the path with the location of its `python.exe`.
+
 Open <http://127.0.0.1:5000> in a browser. Choose either the science trivia or the Weizmann Institute history quiz. The science quiz lets you select one or more science areas; both quizzes ask five questions and show your score and answer review when the round is complete. The history quiz draws from a 50-question bank covering the Institute's founding and early leadership, Chaim Weizmann, WEIZAC, and later research and education milestones. It uses `weizmann_history_trivia/questions.csv`.
 
 ## Run the separate DNA calculator app
@@ -22,6 +32,8 @@ In another terminal, from the repository root, run:
 ```text
 python day04/dna_app.py
 ```
+
+If `python` is not recognized on Windows, run `& $python day04\dna_app.py` in the same PowerShell session after setting `$python` as shown above.
 
 Open <http://127.0.0.1:5001> in a browser. Enter a sequence containing A, C, G, and T to see individual nucleotide percentages and combined CG/AT percentages. This app reuses the calculation function from `training/dna_composition.py`. It runs independently of the quiz app; both apps can be running at the same time.
 

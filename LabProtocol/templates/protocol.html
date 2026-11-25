@@ -93,8 +93,13 @@
     {% if procedure_confirmations or culture_format_settings.status == "requires_confirmation" %}
     <div class="warning" role="note">
         <strong>Review before use.</strong>
+        {% if method_id == "hbs" %}
+        This protocol is based on a user-supplied example, not a manufacturer
+        protocol. Confirm the listed details before use.
+        {% else %}
         This generated document includes items that still need confirmation
         against the current manufacturer instructions.
+        {% endif %}
     </div>
     {% endif %}
 
@@ -170,6 +175,12 @@
 
         <table>
             <tr><th>Total nucleic acid per vessel</th><td>{{ config.master_mix.total_nucleic_acid_ng_per_well }} ng</td></tr>
+            {% if method_id == "hbs" %}
+            <tr><th>DDW per vessel / total</th><td>{{ "%.3f"|format(config.master_mix.water_per_well_ul) }} / {{ "%.3f"|format(config.master_mix.water_total_ul) }} µL</td></tr>
+            <tr><th>2.5 M CaCl2 per vessel / total</th><td>{{ "%.3f"|format(config.master_mix.cacl2_per_well_ul) }} / {{ "%.3f"|format(config.master_mix.cacl2_total_ul) }} µL</td></tr>
+            <tr><th>2x HBS per vessel / total</th><td>{{ "%.3f"|format(config.master_mix.hbs_per_well_ul) }} / {{ "%.3f"|format(config.master_mix.hbs_total_ul) }} µL</td></tr>
+            <tr><th>Mixture per vessel</th><td>{{ "%.3f"|format(config.master_mix.transfection_mixture_volume_per_reaction_ul) }} µL</td></tr>
+            {% else %}
             <tr><th>{{ reagent_name }} per vessel</th><td>{{ "%.3f"|format(config.master_mix.reagent_volume_per_well_ul) }} µL</td></tr>
             <tr><th>Total {{ reagent_name }}</th><td>{{ "%.3f"|format(config.master_mix.reagent_volume_ul) }} µL</td></tr>
             <tr>
@@ -192,6 +203,7 @@
                     {% endif %}
                 </td>
             </tr>
+            {% endif %}
             <tr>
                 <th>Total transfection mixture</th>
                 <td>
@@ -281,12 +293,14 @@
             {% endif %}
         </ul>
 
+        {% if method_id != "hbs" %}
         <p><strong>{{ reagent_name }} ratio used:</strong>
             {{ "%.3f"|format(reagent_ratio) }} µL/µg</p>
+        {% endif %}
         <p><strong>Preparation excess:</strong>
             {{ "%.2f"|format(preparation_excess_percent) }}%</p>
         <p>
-            <strong>Manufacturer format guidance:</strong>
+            <strong>{% if method_id == "hbs" %}Example source{% else %}Manufacturer format guidance{% endif %}:</strong>
             {% if culture_format_settings.source_url %}
             <a href="{{ culture_format_settings.source_url }}">
                 Open source protocol
@@ -308,6 +322,12 @@
                value="{{ reagent_ratio }}">
         <input type="hidden" name="preparation_excess_percent"
                value="{{ preparation_excess_percent }}">
+        {% if target_total_acid_ng is not none %}
+        <input type="hidden" name="target_total_acid_ng" value="{{ target_total_acid_ng }}">
+        {% endif %}
+        {% if empty_vector_concentration is not none %}
+        <input type="hidden" name="empty_vector_concentration" value="{{ empty_vector_concentration }}">
+        {% endif %}
         <input type="hidden" name="temperature_celsius"
                value="{{ temperature_celsius }}">
         <input type="hidden" name="co2_percent" value="{{ co2_percent }}">

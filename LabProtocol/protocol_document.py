@@ -206,7 +206,7 @@ def _add_plate_layout(document, plate_layouts, available_width):
 
 def _add_reagent_table(
     document, treatment_config, preparation_excess_percent, available_width,
-    reagent_name="JetPRIME", buffer_name="Buffer"
+    reagent_name="JetPRIME", buffer_name="Buffer", is_hbs=False
 ):
     master_mix = treatment_config["master_mix"]
     table = document.add_table(rows=1, cols=5)
@@ -231,7 +231,7 @@ def _add_reagent_table(
         cells[3].text = _format_volume(acid["volume_per_well_ul"])
         cells[4].text = _format_volume(acid["total_volume_ul"])
 
-    for label, per_vessel, total in (
+    components = (
         (
             reagent_name,
             master_mix["reagent_volume_per_well_ul"],
@@ -242,7 +242,12 @@ def _add_reagent_table(
             master_mix["buffer_volume_per_reaction_ul"],
             master_mix["buffer_volume_ul"]
         )
-    ):
+    ) if not is_hbs else (
+        ("DDW", master_mix["water_per_well_ul"], master_mix["water_total_ul"]),
+        ("CaCl2 (2.5 M)", master_mix["cacl2_per_well_ul"], master_mix["cacl2_total_ul"]),
+        ("2x HBS", master_mix["hbs_per_well_ul"], master_mix["hbs_total_ul"])
+    )
+    for label, per_vessel, total in components:
         cells = table.add_row().cells
         cells[0].text = label
         cells[1].text = "N/A"
@@ -367,7 +372,8 @@ def create_protocol_document(protocol):
             level=2
         )
         master_mix = config["master_mix"]
-        if master_mix["buffer_volume_per_reaction_ul"] is None:
+        if (protocol.get("method_id") != "hbs"
+                and master_mix["buffer_volume_per_reaction_ul"] is None):
             warning = document.add_paragraph()
             warning.add_run("Do not use this mix until confirmed: ").bold = True
             warning.add_run(
@@ -382,11 +388,24 @@ def create_protocol_document(protocol):
             protocol["reagent_name"],
             protocol["culture_format_settings"].get(
                 "buffer_name", "Buffer"
-            )
+            ),
+            protocol.get("method_id") == "hbs"
         )
 
     document.add_heading("4. Procedure", level=1)
     _add_procedure(document, protocol["procedure_steps"])
+    if protocol.get("method_id") == "hbs":
+        document.add_heading("Confirm before use", level=2)
+        for confirmation in protocol["procedure_confirmations"]:
+            document.add_paragraph(confirmation, style="List Bullet")
+        document.add_paragraph(
+            "User-selected incubation settings: "
+            f'{protocol["temperature_celsius"]:g} °C, '
+            f'{protocol["co2_percent"]:g}% CO₂; '
+            + (f'{protocol["incubation_time_hours"]:g} hours.'
+               if protocol["incubation_time_hours"] is not None
+               else "duration not specified.")
+        )
     source = protocol.get("procedure_source")
     if source:
         source_paragraph = document.add_paragraph()
