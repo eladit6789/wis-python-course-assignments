@@ -170,6 +170,32 @@ class HbsRouteTests(unittest.TestCase):
         self.assertIn(b"original stock", missing_stock.data)
         self.assertNotIn(b"Download Word document", missing_stock.data)
 
+    def test_edit_actions_keep_entered_values_for_all_methods(self):
+        for method in ("hbs", "jetprime", "lipofectamine"):
+            with self.subTest(method=method):
+                form = {**self.form, "stage": "generate_protocol"}
+                generated = self.client.post(f"/transfection/{method}", data=form)
+                self.assertIn(b"Edit Nucleic Acid Setup", generated.data)
+                self.assertIn(b"Back to Experiment Setup", generated.data)
+
+                details = self.client.post(
+                    f"/transfection/{method}",
+                    data={**form, "action": "edit_details"}
+                )
+                self.assertIn(b'value="Firefly"', details.data)
+                self.assertIn(b'value="Renilla"', details.data)
+                self.assertIn(b'value="GFP"', details.data)
+                self.assertIn(b'value="5"', details.data)
+                self.assertIn(b"Calculate Master Mixes", details.data)
+
+                setup = self.client.post(
+                    f"/transfection/{method}",
+                    data={**form, "action": "edit_setup"}
+                )
+                self.assertIn(b'value="WT"', setup.data)
+                self.assertIn(b'value="Renilla"', setup.data)
+                self.assertIn(b"Continue", setup.data)
+
 
 if __name__ == "__main__":
     unittest.main()

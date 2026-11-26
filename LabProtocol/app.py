@@ -380,7 +380,7 @@ def transfection(method_id):
     error_message = None
 
     if request.method == "POST":
-        stage = request.form.get("stage", "setup")
+        stage = request.form.get("action") or request.form.get("stage", "setup")
         try:
             (
                 submitted_strains,
@@ -405,7 +405,9 @@ def transfection(method_id):
             )
             culture_format = request.form.get("culture_format", "").strip()
 
-        if setup_complete:
+        if setup_complete and stage == "edit_setup":
+            setup_complete = False
+        elif setup_complete:
             group_count = len(submitted_strains) * len(submitted_treatments)
             if stage == "setup":
                 group_replicates = [technical_replicates] * group_count
@@ -471,7 +473,8 @@ def transfection(method_id):
             elif stage in (
                 "save_nucleic_acids",
                 "generate_protocol",
-                "download_docx"
+                "download_docx",
+                "edit_details"
             ):
                 ratio_value = request.form.get(
                     ratio_name,
@@ -582,7 +585,7 @@ def transfection(method_id):
                             "number_of_wells": treatment_wells,
                             "master_mix": master_mix
                         })
-                    calculations_complete = True
+                    calculations_complete = stage != "edit_details"
                     protocol_generated = stage in (
                         "generate_protocol",
                         "download_docx"

@@ -105,9 +105,14 @@
     </style>
 </head>
 
-<body>
+<body data-method-id="{{ method_id }}"
+      data-stage="{% if not setup_complete %}setup{% elif not calculations_complete %}details{% else %}results{% endif %}"
+      data-request-stage="{{ request.form.get('stage', '') }}"
+      data-has-error="{{ 'true' if error_message else 'false' }}"
+      data-request-method="{{ request.method }}">
 
     <h1>{{ reagent_name }} Experiment Setup</h1>
+    <p>Use the edit buttons to return to earlier steps. Your draft is kept in this browser tab.</p>
 
     {% if error_message %}
     <div class="error" role="alert">
@@ -117,7 +122,7 @@
 
     {% if not setup_complete %}
 
-    <form method="POST">
+    <form id="experiment-form" method="POST">
 
         <input type="hidden" name="stage" value="setup">
 
@@ -208,6 +213,8 @@
     </form>
 
     {% else %}
+
+    <div id="draft-notice" class="warning" role="status" hidden></div>
 
     {% if method_id == "hbs" %}
     <div class="warning" role="note">
@@ -441,7 +448,7 @@
 
             <p>
                 Number of wells:
-                {{ config.number_of_wells }}
+                <span data-treatment-wells="{{ loop.index0 }}">{{ config.number_of_wells }}</span>
             </p>
 
             {% set treatment_index = loop.index0 %}
@@ -486,6 +493,9 @@
 
         <button type="submit" class="add-button">
             Calculate Master Mixes
+        </button>
+        <button type="submit" name="action" value="edit_setup" formnovalidate>
+            Back to Experiment Setup
         </button>
 
     </form>
@@ -755,6 +765,12 @@
         <button type="submit" class="add-button">
             Generate Customized Protocol
         </button>
+        <button type="submit" name="action" value="edit_details">
+            Edit Nucleic Acid Setup
+        </button>
+        <button type="submit" name="action" value="edit_setup">
+            Back to Experiment Setup
+        </button>
     </form>
 
     {% endif %}
@@ -831,6 +847,7 @@
         }
 
     </script>
+    <script src="{{ url_for('static', filename='experiment_draft.js') }}"></script>
 
 </body>
 </html>
